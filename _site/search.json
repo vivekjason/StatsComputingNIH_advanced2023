@@ -1,0 +1,331 @@
+[
+  {
+    "objectID": "slides_advDataWranggling.html#why-the-need-to-advance",
+    "href": "slides_advDataWranggling.html#why-the-need-to-advance",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Why the need to advance",
+    "text": "Why the need to advance\nImagine you wanted to run a univariate regression on a dataset with 25 column in…"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#computation-is-a-superpower",
+    "href": "slides_advDataWranggling.html#computation-is-a-superpower",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Computation is a superpower",
+    "text": "Computation is a superpower\nRepeat analyses on subgroups such as countries, districts, or age groups. These are but a few of the many situations involving iteration. Using iterations you will:\n\nimplement repetitive tasks faster\nreduce the chance of error\nreduce code length"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#section",
+    "href": "slides_advDataWranggling.html#section",
+    "title": "Moving forward with Data Wrangling",
+    "section": "",
+    "text": "Advanced Data Wrangling Techniques in R\nWe will explore four pivotal techniques that can immensely enhance your data analysis efficiency and flexibility:\n\nLoops:\n\nEssential control structures in R, loops allow for repetitive execution of code blocks.\n\nApply Family:\n\nA powerful alternative to loops, the apply family of functions provides a set of tools for performing operations on data structures, especially lists and data frames.\nWe will only touch on this as it is a base() implementation\n\npurrr:\n\nPart of the renowned tidyverse, purrr enhances iterative tasks by introducing a functional programming paradigm.\n\nWriting Functions:\n\nAt the heart of robust programming, writing custom functions allows for encapsulated, reusable logic."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#loopy-loops",
+    "href": "slides_advDataWranggling.html#loopy-loops",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Loopy loops",
+    "text": "Loopy loops\n\nWhat are loops?\n\nControl structures that allow code to be executed multiple times.\nCan iterate over sequences, vectors, or other data structures.\n\nTypes of loops in R:\n\nFor Loop: Predetermined number of iterations, commonly used to iterate over elements in a sequence.\nWhile Loop: Continues as long as a specified condition is true.\nRepeat Loop: Executes indefinitely and must be manually exited using a condition."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#section-2",
+    "href": "slides_advDataWranggling.html#section-2",
+    "title": "Moving forward with Data Wrangling",
+    "section": "",
+    "text": "Loops in the Real World\n\nData Transformation:\n\nIterating through columns of a dataset to apply ransformations, such as scaling or encoding.\n\nSimulations:\n\nRunning a statistical model multiple times to see varying results under different conditions.\n\nAutomation:\n\nProcessing multiple files or datasets in a directory one by one."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#making-loops-work-for-you",
+    "href": "slides_advDataWranggling.html#making-loops-work-for-you",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Making Loops Work for You",
+    "text": "Making Loops Work for You\n\nPower vs. Cost:\n\nWhile loops provide robust control, they can be computationally heavy.\nOften, there are more efficient ways to achieve similar results.\n\nVectorized Operations in R:\n\nR is designed for vectorized calculations – they’re faster and more concise.\nFunctions like sum(), mean(), and many others automatically work with entire vectors without the need for explicit loops.\n\n\n\n\n\n\n\n\nTip\n\n\nAlways consider whether a loop is the best tool for the job or if a vectorized approach can be utilized."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#section-3",
+    "href": "slides_advDataWranggling.html#section-3",
+    "title": "Moving forward with Data Wrangling",
+    "section": "",
+    "text": "Why Not Loops?\nConsidering Alternatives to Traditional Loops\n\nPitfalls of Loops:\n\nCan be slower for large datasets.\nOften verbose, leading to longer code.\n\nEnter the Apply Family:\n\nDesigned for performing operations on lists, matrices, and data frames.\nOften faster and more concise than equivalent loops."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#meet-the-family",
+    "href": "slides_advDataWranggling.html#meet-the-family",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Meet the Family",
+    "text": "Meet the Family\n\nlapply():\n\nReturns a list.\nCommonly used for list or vector operations.\n\nsapply():\n\nSimplifies results from lapply() to the most basic structure possible (e.g., vector, matrix).\nGreat for quick operations without needing to deal with lists.\n\nmapply():\n\nMultivariate version of lapply().\nApply a function to the 1st elements of each argument, the 2nd elements, and so on.\n\n\n\n\n\n\n\n\nImportant\n\n\nChoosing the right function depends on the structure of your data and the desired output."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#the-power-of-purrr",
+    "href": "slides_advDataWranggling.html#the-power-of-purrr",
+    "title": "Moving forward with Data Wrangling",
+    "section": "The Power of purrr",
+    "text": "The Power of purrr\n\nWhat is purrr?\n\nAn integral part of the tidyverse suite.\nDesigned for functional programming and iterative tasks in R.\n\n\nAdvantages over Base R Loops:\n\nConsistency: Offers a consistent set of tools that align well with the tidyverse ecosystem.\nReadability: With functions like map(), code becomes more intuitive and less cluttered.\nFlexibility: Able to handle various output types (map_dbl(), map_int(), map_df(), etc.) without complex restructuring."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#complex-data-simplified-with-purrr",
+    "href": "slides_advDataWranggling.html#complex-data-simplified-with-purrr",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Complex Data Simplified with purrr",
+    "text": "Complex Data Simplified with purrr\n\nWhat are List-columns & Nested Data?\n\nData frames where each cell can contain more than one value or another data frame.\nArise frequently in advanced data wrangling tasks, especially when data is hierarchical or grouped.\n\npurrr’s Approach:\n\nMakes handling and iterating over list-columns more straightforward.\nFunctions like map() can be combined with mutate() from dplyr for powerful transformations.\nSimplify operations like extracting, modifying, or summarizing nested data without cumbersome loops."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#embracing-a-new-paradigm",
+    "href": "slides_advDataWranggling.html#embracing-a-new-paradigm",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Embracing a New Paradigm",
+    "text": "Embracing a New Paradigm\n\nUnderstanding Functional Programming:\n\nA style of programming where functions are first-class citizens – they can be passed as arguments, returned, or stored.\nFocuses on immutability, reducing side effects and making code more predictable.\n\nBenefits in Data Analysis:\n\nModularity: Write code in self-contained, reusable chunks.\nClarity: Achieve more with fewer lines of code, enhancing readability.\nSafety: Less risk of unintended side effects, making debugging and validation more straightforward."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#custom-functions-in-r",
+    "href": "slides_advDataWranggling.html#custom-functions-in-r",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Custom Functions in R",
+    "text": "Custom Functions in R\n\nWhy Functions?\n\nEncapsulate logic for reuse.\nEnhance code readability and maintainability.\n\nBasic Structure:"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#understanding-function-components",
+    "href": "slides_advDataWranggling.html#understanding-function-components",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Understanding Function Components",
+    "text": "Understanding Function Components\n\nArguments: Inputs the function requires to run.\nBody: The core code that gets executed.\nReturn Values: The output produced by the function.\n\n\n\n\n\n\n\nTip\n\n\n\nKeep functions focused on a single task.\nUse meaningful argument and function names.\nHandle potential errors or exceptions within the function."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#so-then..-lets-get-started-on-some-code",
+    "href": "slides_advDataWranggling.html#so-then..-lets-get-started-on-some-code",
+    "title": "Moving forward with Data Wrangling",
+    "section": "So then.. lets get started on some code",
+    "text": "So then.. lets get started on some code\nThis page will introduce two approaches to iterative operations - using for loops and using the package purrr.\n\nfor loops iterate code across a series of inputs, but are less common in R than in other programming languages. Nevertheless, we introduce them here as a learning tool and reference\n\nThe purrr package is the tidyverse approach to iterative operations - it works by \"mapping\" a function across many inputs (values, columns, datasets, etc.)\n\nAlong the way, we'll show examples like:\n\nImporting and exporting multiple files\n\nCreating epicurves for multiple jurisdictions\n\nRunning T-tests for several columns in a data frame\n\nIn the purrr section we will also provide several examples of creating and handling lists."
+  },
+  {
+    "objectID": "slides_advDataViz.html#gis-visualization-mapping-the-world",
+    "href": "slides_advDataViz.html#gis-visualization-mapping-the-world",
+    "title": "Moving on with Data Visualisation",
+    "section": "GIS Visualization: Mapping the World",
+    "text": "GIS Visualization: Mapping the World\n\nWhat is GIS? (Geographic Information Systems)\nUse Cases: Spatial analysis, urban planning, disaster response, etc.\nBringing geographical context to data"
+  },
+  {
+    "objectID": "slides_advDataViz.html#mapping-in-r-key-packages-tools",
+    "href": "slides_advDataViz.html#mapping-in-r-key-packages-tools",
+    "title": "Moving on with Data Visualisation",
+    "section": "Mapping in R: Key Packages & Tools",
+    "text": "Mapping in R: Key Packages & Tools\n\nsf: Handling spatial data\ntmap: Thematic maps\nOpenStreetMap integration\nspdep: Spatial dependence: weights, models"
+  },
+  {
+    "objectID": "slides_advDataViz.html#phylogenetic-trees-tracing-lineages",
+    "href": "slides_advDataViz.html#phylogenetic-trees-tracing-lineages",
+    "title": "Moving on with Data Visualisation",
+    "section": "Phylogenetic Trees: Tracing Lineages",
+    "text": "Phylogenetic Trees: Tracing Lineages\n\nUnderstand evolutionary relationships\nTrace the source of outbreaks in epidemiology\nAnalyze shared characteristics & descent"
+  },
+  {
+    "objectID": "slides_advDataViz.html#drawing-evolution-r-packages-for-trees",
+    "href": "slides_advDataViz.html#drawing-evolution-r-packages-for-trees",
+    "title": "Moving on with Data Visualisation",
+    "section": "Drawing Evolution: R Packages for Trees",
+    "text": "Drawing Evolution: R Packages for Trees\n\nape: Analyses of Phylogenetics and Evolution\nggtree: Extension of ggplot2 for phylogenetic trees\ntreeio: Import/export tree data\nggnewscale: Multiple scales in ggplot2"
+  },
+  {
+    "objectID": "slides_advDataViz.html#interactive-plots-engage-with-your-data",
+    "href": "slides_advDataViz.html#interactive-plots-engage-with-your-data",
+    "title": "Moving on with Data Visualisation",
+    "section": "Interactive Plots: Engage with Your Data",
+    "text": "Interactive Plots: Engage with Your Data\n\nWhy interactive plots? (Dynamic visualization, deeper data exploration)\nUsed in web apps, dashboards, reports\nEnhanced user engagement & understanding"
+  },
+  {
+    "objectID": "slides_advDataViz.html#making-data-dance-with-plotly",
+    "href": "slides_advDataViz.html#making-data-dance-with-plotly",
+    "title": "Moving on with Data Visualisation",
+    "section": "Making Data Dance with plotly",
+    "text": "Making Data Dance with plotly\n\nCreate interactive web graphics\nEasily integrates with ggplot2\nHover, zoom, select for better insights"
+  },
+  {
+    "objectID": "slides_advDataViz.html#network-visualization-seeing-connections",
+    "href": "slides_advDataViz.html#network-visualization-seeing-connections",
+    "title": "Moving on with Data Visualisation",
+    "section": "Network Visualization: Seeing Connections",
+    "text": "Network Visualization: Seeing Connections\n\nRepresent relationships between entities\nUse Cases: Social networks, organizational structures, web graphs\nUnderstand network topology & dynamics"
+  },
+  {
+    "objectID": "slides_advDataViz.html#web-of-relations-r-packages-for-networks",
+    "href": "slides_advDataViz.html#web-of-relations-r-packages-for-networks",
+    "title": "Moving on with Data Visualisation",
+    "section": "Web of Relations: R Packages for Networks",
+    "text": "Web of Relations: R Packages for Networks\n\nigraph: Network analysis and visualization\nvisNetwork: Interactive network visualizations\nOptional: ggraph: Graph layouts with ggplot2\\"
+  },
+  {
+    "objectID": "slides_advDataViz.html#expanding-visual-horizons-with-r",
+    "href": "slides_advDataViz.html#expanding-visual-horizons-with-r",
+    "title": "Moving on with Data Visualisation",
+    "section": "Expanding Visual Horizons with R",
+    "text": "Expanding Visual Horizons with R\n\nThe power of advanced visualization techniques\nTools & packages to bring data to life\nEmphasize continuous learning & exploration"
+  },
+  {
+    "objectID": "slides_survival.html#what-is-survival-analysis",
+    "href": "slides_survival.html#what-is-survival-analysis",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "What is Survival Analysis?",
+    "text": "What is Survival Analysis?\n\nCollection of statistical procedures.\nAnswer questions related to survival past a time or event.\nData form: time until event occurs.\nConvention: time (survival time), event (failure)."
+  },
+  {
+    "objectID": "slides_survival.html#examples-of-survival-analysis",
+    "href": "slides_survival.html#examples-of-survival-analysis",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Examples of Survival Analysis",
+    "text": "Examples of Survival Analysis\n\nClinical trial: Test medicine effects, time until disease.\nFinance: Credit model, time to client default.\nEconomics: Unemployment duration.\nIndustry engineering: Lifetime of products."
+  },
+  {
+    "objectID": "slides_survival.html#types-of-survival-data",
+    "href": "slides_survival.html#types-of-survival-data",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Types of Survival Data",
+    "text": "Types of Survival Data\n\nComplete data\nTruncation: Observations based on events.\nCensoring: Time of event is imprecise.\nThree types: right, left, and interval censoring."
+  },
+  {
+    "objectID": "slides_survival.html#more-on-censoring",
+    "href": "slides_survival.html#more-on-censoring",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "More on Censoring",
+    "text": "More on Censoring\n\nRight censoring: Most common. True time > Observed time.\nLeft censoring: True time < Observed time.\nInterval censoring: Between two observed times."
+  },
+  {
+    "objectID": "slides_survival.html#a-note-on-right-censoring",
+    "href": "slides_survival.html#a-note-on-right-censoring",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "A note on right-censoring",
+    "text": "A note on right-censoring\nTime to the occurrence of a given event (e.g. death) measured from a well-defined starting point (time origin)\n\ne.g. Time from study enrollment to death in a cancer clinical trial\n\nThe full time to death is not observed for some subjects\n\nWithdrawal, lost to follow-up, alive at the end of study\nAll we know is the survival time is larger than the censoring time (e.g. time from study enrollment to drop out)"
+  },
+  {
+    "objectID": "slides_survival.html#data-layout",
+    "href": "slides_survival.html#data-layout",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Data Layout",
+    "text": "Data Layout\n\nRepresented by pair (t, d).\nt: time, d: censoring indicator.\nd=1 if failure, d=0 if censored.\nx: covariates of interest."
+  },
+  {
+    "objectID": "slides_survival.html#survival-function",
+    "href": "slides_survival.html#survival-function",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Survival Function",
+    "text": "Survival Function\n\nProportion of population still without event by time t.\nGraphed as decreasing smooth curve.\nS(t) = Pr(T > t)\n\n\n\n\n\n\n\n\n## Estimating Survival Curves\n\n\n- Kaplan-Meier (KM) estimator used.\n\n\n- Step function, not smooth.\n\n\n- Curve jumps at observed failure times."
+  },
+  {
+    "objectID": "slides_survival.html#cox-regression",
+    "href": "slides_survival.html#cox-regression",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Cox regression",
+    "text": "Cox regression"
+  },
+  {
+    "objectID": "slides_survival.html#cox-regression-1",
+    "href": "slides_survival.html#cox-regression-1",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Cox regression",
+    "text": "Cox regression"
+  },
+  {
+    "objectID": "slides_survival.html#cox-proportional-hazards-model",
+    "href": "slides_survival.html#cox-proportional-hazards-model",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Cox Proportional Hazards Model",
+    "text": "Cox Proportional Hazards Model\n\nModel setup\nThe Cox PH model specifies the hazard for individual i.\nNote: There is no intercept term in the Cox model.\nModel assumption\nProportional hazards (PH) assumption.\nPH assumption requires a constant over time\nModel interpretation"
+  },
+  {
+    "objectID": "slides_survival.html#checking-assumptions",
+    "href": "slides_survival.html#checking-assumptions",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Checking Assumptions",
+    "text": "Checking Assumptions\n\nDeviance residual plot\nSchoenfeld resiual plot\nto check proportional hazards assumption\nrandomness of residuals == proportionality"
+  },
+  {
+    "objectID": "slides_survival.html#when-ph-assumption-is-violated",
+    "href": "slides_survival.html#when-ph-assumption-is-violated",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "When PH Assumption is Violated",
+    "text": "When PH Assumption is Violated\n\nStratified Cox model\nTime-varying coefficients\nAccelerated failure-time models (AFT)\nParametric survival analysis\nMultilevel survival models etc…"
+  },
+  {
+    "objectID": "slides_survival.html#implementing-survival-analysis-in-r",
+    "href": "slides_survival.html#implementing-survival-analysis-in-r",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Implementing survival analysis in R",
+    "text": "Implementing survival analysis in R"
+  },
+  {
+    "objectID": "slides_survival.html#conclusion",
+    "href": "slides_survival.html#conclusion",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Conclusion",
+    "text": "Conclusion\n\nSurvival Analysis is crucial in various fields.\nVarious methods available for estimation & testing.\nR offers comprehensive tools for survival analysis."
+  },
+  {
+    "objectID": "slides_survival.html#hazard-function",
+    "href": "slides_survival.html#hazard-function",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Hazard Function",
+    "text": "Hazard Function\n\nAlternative names: Incidence rate, Instantaneous risk.\nInstantaneous potential for event to occur.\nValues range between zero and infinity."
+  },
+  {
+    "objectID": "slides_survival.html#relative-risks",
+    "href": "slides_survival.html#relative-risks",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Relative Risks",
+    "text": "Relative Risks\n\nKnown as Risk ratio, Hazard ratio (RR/HR).\nMeasure strength of effect on survival.\nDefined via hazard rates of treatment vs control groups."
+  },
+  {
+    "objectID": "slides_survival.html#testing-survival-curves-differences",
+    "href": "slides_survival.html#testing-survival-curves-differences",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Testing Survival Curves Differences",
+    "text": "Testing Survival Curves Differences\n\nLog-rank test for two survival curves.\nStratified log-rank test for categorical variables."
+  },
+  {
+    "objectID": "slides_survival.html#log-rank-test",
+    "href": "slides_survival.html#log-rank-test",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Log-Rank Test",
+    "text": "Log-Rank Test\n\nTest equality of two survival curves.\nStatistic based on series of tables.\nTest at infinity many time points."
+  },
+  {
+    "objectID": "slides_survival.html#goals-of-survival-analysis",
+    "href": "slides_survival.html#goals-of-survival-analysis",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Goals of Survival Analysis",
+    "text": "Goals of Survival Analysis\n\nEstimate & interpret survival and hazard functions.\nCompare survival/hazard functions.\nAssess relationship of variables to survival time."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Welcome to the Statistical Computing in R! for Intermediates to Advanced organised by the Sector for Biostatistics and Data Repository, National Institutes of Health, Malaysia\n\n\n\n\n\n\n\nThis workshop advances the groundwork for addressing key practical aspects of programming and other essential computer skills needed for both research and implementation of statistical methods. The course offers advanced data wrangling and data visualisation, as well as an exploration of both survival analysis and survey-based analysis in R.\n\n\n\nHave a look at the schedule below and download the necessary .qmd files for each session. Slides are also provided. While I have included solutions- it would be way more beneficial to attempt these yourself first. Lets try to maximise learning in the next two days.\n\n\n\n\n\n\n\n\n\n\n\nDate\nTime\nTopic\n\n\n\n\n10.10.2023 (Tuesday)\n08.30 am - 09.00 am\nRegistration\n\n\n\n9.00 am - 10.00 am\nAdvanced data wranggling\n\nLoops- applied epi\nmap() using purrr -applied epi\nfunctions- applied epi\n\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 1\n\nchatgpt\n\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 04.30 pm\nAdvanced data visualisation\n\nChoropleths - Applied Epi\nPhylogenetic trees - Applied Epi\nNetwork visualisations - https://www.jessesadler.com/post/network-analysis-with-r/\nInteractive plots - Applied Epi\n\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 2\n\nchatgpt\n\n\n\n11.10.2023 (Wednesday)\n08.00 am – 08.30 am\nRegistration\n\n\n\n09.00 am - 10.00 am\nSurvival analysis- applied epi\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 3\n\nchatgpt\n\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 03.00 pm\nGEE and GLMM\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 4\n\nchatgpt\n\n\n\n\n04.30 pm - 05.00 pm\nQ&A\n\n\n\n\n\n\n\n\n\n\n\nVivek Jason\nJason is a gazetting Public Health Physician passionate about epidemiology, infectious diseases and data science. He spends his time between coding, parenting a toddler and pondering the fate of the universe.\n\n\n\n\n\nAng Swee Hung\nSwee Hung is a training Public Health Physician from the Institute for Clinical research that works heavily in the fields of non-communicable disease epidemiology. Renowned for her calmness under pressure- Swee Hung also enjoys the serenity of long drives and the excitement of travelling. Her next destination is Shanghai.\n\nYvonne Lim Mei Fong\nYvonne is a detail-oriented pharmacist at ICR, with a PhD in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality for her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit\nThis course was developed and is maintained by Vivek Jason.\nThe following individuals have contributed to improving the course or materials have been adapted from their courses: R for Applied Epidemiology and Public Health\nThe course materials are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know and I will remove it."
+  },
+  {
+    "objectID": "index.html#what-is-this-workshop",
+    "href": "index.html#what-is-this-workshop",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "This workshop advances the groundwork for addressing key practical aspects of programming and other essential computer skills needed for both research and implementation of statistical methods. The course offers advanced data wrangling and data visualisation, as well as an exploration of both survival analysis and survey-based analysis in R."
+  },
+  {
+    "objectID": "index.html#getting-started",
+    "href": "index.html#getting-started",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Have a look at the schedule below and download the necessary .qmd files for each session. Slides are also provided. While I have included solutions- it would be way more beneficial to attempt these yourself first. Lets try to maximise learning in the next two days."
+  },
+  {
+    "objectID": "index.html#schedule-and-materials",
+    "href": "index.html#schedule-and-materials",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Date\nTime\nTopic\n\n\n\n\n10.10.2023 (Tuesday)\n08.30 am - 09.00 am\nRegistration\n\n\n\n9.00 am - 10.00 am\nAdvanced data wranggling\n\nLoops- applied epi\nmap() using purrr -applied epi\nfunctions- applied epi\n\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 1\n\nchatgpt\n\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 04.30 pm\nAdvanced data visualisation\n\nChoropleths - Applied Epi\nPhylogenetic trees - Applied Epi\nNetwork visualisations - https://www.jessesadler.com/post/network-analysis-with-r/\nInteractive plots - Applied Epi\n\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 2\n\nchatgpt\n\n\n\n11.10.2023 (Wednesday)\n08.00 am – 08.30 am\nRegistration\n\n\n\n09.00 am - 10.00 am\nSurvival analysis- applied epi\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 3\n\nchatgpt\n\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 03.00 pm\nGEE and GLMM\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 4\n\nchatgpt\n\n\n\n\n04.30 pm - 05.00 pm\nQ&A"
+  },
+  {
+    "objectID": "index.html#speakers",
+    "href": "index.html#speakers",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Vivek Jason\nJason is a gazetting Public Health Physician passionate about epidemiology, infectious diseases and data science. He spends his time between coding, parenting a toddler and pondering the fate of the universe.\n\n\n\n\n\nAng Swee Hung\nSwee Hung is a training Public Health Physician from the Institute for Clinical research that works heavily in the fields of non-communicable disease epidemiology. Renowned for her calmness under pressure- Swee Hung also enjoys the serenity of long drives and the excitement of travelling. Her next destination is Shanghai.\n\nYvonne Lim Mei Fong\nYvonne is a detail-oriented pharmacist at ICR, with a PhD in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality for her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit\nThis course was developed and is maintained by Vivek Jason.\nThe following individuals have contributed to improving the course or materials have been adapted from their courses: R for Applied Epidemiology and Public Health\nThe course materials are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know and I will remove it."
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Welcome to the Statistical Computing in R! for Intermediates to Advanced organised by the Sector for Biostatistics and Data Repository, National Institutes of Health, Malaysia\n\n\n\n\n\n\n\nThis workshop advances the groundwork for addressing key practical aspects of programming and other essential computer skills needed for both research and implementation of statistical methods. The course offers advanced data wrangling and data visualisation, as well as an exploration of both survival analysis and survey-based analysis in R.\n\n\n\nHave a look at the schedule below and download the necessary .qmd files for each session. Slides are also provided. While I have included solutions- it would be way more beneficial to attempt these yourself first. Lets try to maximise learning in the next two days.\n\n\n\n\n\n\n\n\n\n\n\nDate\nTime\nTopic\n\n\n\n\n10.10.2023 (Tuesday)\n08.30 am - 09.00 am\nRegistration\n\n\n\n9.00 am - 10.00 am\nAdvanced data wranggling\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 1\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 04.30 pm\nAdvanced data visualisation\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 2\n\n\n11.10.2023 (Wednesday)\n08.00 am – 08.30 am\nRegistration\n\n\n\n09.00 am - 10.00 am\nSurvival analysis\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 3\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 03.00 pm\nGEE and GLMM\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 4\n\n\n\n04.30 pm - 05.00 pm\nQ&A\n\n\n\n\n\n\n\n\n\n\n\nVivek Jason\nJason is a gazetting Public Health Physician passionate about epidemiology, infectious diseases and data science. He spends his time between coding, parenting a toddler and pondering the fate of the universe.\n\n\n\n\n\nAng Swee Hung\nSwee Hung is a training Public Health Physician from the Institute for Clinical research that works heavily in the fields of non-communicable disease epidemiology. Renowned for her calmness under pressure- Swee Hung also enjoys the serenity of long drives and the excitement of travelling. Her next destination is Shanghai.\n\nYvonne Lim Mei Fong\nYvonne is a detail-oriented pharmacist at ICR, with a PhD in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality for her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit\nThis course was developed and is maintained by Vivek Jason.\nThe following individuals have contributed to improving the course or materials have been adapted from their courses: R for Applied Epidemiology and Public Health and R for Researchers: An Introduction\nThe course materials are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know and I will remove it."
+  },
+  {
+    "objectID": "index.html#what-is-this-workshop",
+    "href": "index.html#what-is-this-workshop",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "This workshop advances the groundwork for addressing key practical aspects of programming and other essential computer skills needed for both research and implementation of statistical methods. The course offers advanced data wrangling and data visualisation, as well as an exploration of both survival analysis and survey-based analysis in R."
+  },
+  {
+    "objectID": "index.html#getting-started",
+    "href": "index.html#getting-started",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Have a look at the schedule below and download the necessary .qmd files for each session. Slides are also provided. While I have included solutions- it would be way more beneficial to attempt these yourself first. Lets try to maximise learning in the next two days."
+  },
+  {
+    "objectID": "index.html#schedule-and-materials",
+    "href": "index.html#schedule-and-materials",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Date\nTime\nTopic\n\n\n\n\n10.10.2023 (Tuesday)\n08.30 am - 09.00 am\nRegistration\n\n\n\n9.00 am - 10.00 am\nAdvanced data wranggling\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 1\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 04.30 pm\nAdvanced data visualisation\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 2\n\n\n11.10.2023 (Wednesday)\n08.00 am – 08.30 am\nRegistration\n\n\n\n09.00 am - 10.00 am\nSurvival analysis\n\n\n\n10.00 am - 12.30 pm\n#Taking the Wheel 3\n\n\n\n12.30 pm - 02.00 pm\nBreak\n\n\n\n02.00 pm - 03.00 pm\nGEE and GLMM\n\n\n\n03.00 pm - 04.30 pm\n#Taking the Wheel 4\n\n\n\n04.30 pm - 05.00 pm\nQ&A"
+  },
+  {
+    "objectID": "index.html#speakers",
+    "href": "index.html#speakers",
+    "title": "Welcome to Statistical Computing in R!",
+    "section": "",
+    "text": "Vivek Jason\nJason is a gazetting Public Health Physician passionate about epidemiology, infectious diseases and data science. He spends his time between coding, parenting a toddler and pondering the fate of the universe.\n\n\n\n\n\nAng Swee Hung\nSwee Hung is a training Public Health Physician from the Institute for Clinical research that works heavily in the fields of non-communicable disease epidemiology. Renowned for her calmness under pressure- Swee Hung also enjoys the serenity of long drives and the excitement of travelling. Her next destination is Shanghai.\n\nYvonne Lim Mei Fong\nYvonne is a detail-oriented pharmacist at ICR, with a PhD in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality for her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit\nThis course was developed and is maintained by Vivek Jason.\nThe following individuals have contributed to improving the course or materials have been adapted from their courses: R for Applied Epidemiology and Public Health and R for Researchers: An Introduction\nThe course materials are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know and I will remove it."
+  }
+]

@@ -1,0 +1,518 @@
+---
+title: "SuRviving R: A Dive into Survival Analysis"
+author: "Vivek Jason"
+editor: visual
+---
+
+### Overview
+
+Survival analysis describes the time between an origin and an event like disease occurrence, death, or relapse after treatment. This duration is often represented by the survival probability: the chance the event hasn't occurred by a given time. Censoring happens when some subjects haven't had the event by the end of follow-up, making their event time unknown.
+
+### Preparation
+
+#### Load Packages
+
+```{r}
+# We use p_load() from pacman. It installs the package if necessary and loads it.
+# Alternatively, use library() from base R for loading packages.
+pacman::p_load(
+  rio,       # For data import/export
+  here,      # For file path handling
+  janitor,   # For tabulation and data cleaning
+  tidyverse, # For data manipulation and visualization
+  survival , # For survival analysis functions
+  survminer,  # Extension to survival()
+  SemiCompRisks # Dataset used to illustrate time varying structure
+)
+```
+
+#### Import Dataset
+
+We import the dataset of cases from a simulated Ebola epidemic that was developed by the brilliant people at Applied Epi. You should have downloaded it yesterday.
+
+```{r}
+# Import linelist data
+linelist_case_data <- import(here("data", "linelist_cleaned.rds"))
+```
+
+### Data Management and Transformation
+
+Survival data typically has:
+
+-   A dependent variable representing the wait time for an event.
+
+-   Observations that are censored.
+
+-   Predictors or explanatory variables.
+
+Lets have a quick gander at out data
+
+```{r}
+skimr::skim(linelist_case_data)
+```
+
+You will notice that some of the above criteria are not met. We create a new survival dataset from this original data to fulfill these criteria. This includes:
+
+-   a variable to code for our event of interest- "death" (hence our survival probability will be the probability of being alive after a certain time after the time of origin),
+
+-   the follow-up time (`futime`) as the time between the time of onset and the time of outcome *in days*,
+
+-   censored patients as those who recovered or for whom the final outcome is not known ie the event "death" was not observed (`event=0`)
+
+Here, we transform the data to fit this structure:
+
+```{r}
+#create a new data called linelist_surv from the linelist_case_data
+linelist_surv <-  linelist_case_data %>% 
+     
+  dplyr::filter(
+       # remove observations with wrong or missing dates of onset or date of outcome
+       date_outcome > date_onset) %>% 
+  
+  dplyr::mutate(
+       # create the event var which is 1 if the patient died and 0 if he was right censored
+       event = ifelse(is.na(outcome) | outcome == "Recover", 0, 1), 
+    
+       # create the var on the follow-up time in days
+       futime = as.double(date_outcome - date_onset), 
+    
+       # create a new age category variable with only 3 strata levels
+       age_cat_small = dplyr::case_when( 
+            age_years < 5  ~ "0-4",
+            age_years >= 5 & age_years < 20 ~ "5-19",
+            age_years >= 20   ~ "20+"),
+       
+       # previous step created age_cat_small var as character.
+       # now convert it to factor and specify the levels.
+       # Note that the NA values remain NA's and are not put in a level "unknown" for example,
+       # since in the next analyses they have to be removed.
+       age_cat_small = fct_relevel(age_cat_small, "0-4", "5-19", "20+")
+       )
+```
+
+#### Data Review
+
+Check the new variables:
+
+```{r}
+summary(linelist_surv$futime)
+```
+
+```{r}
+# cross tabulate the new event var and the outcome var from which it was created
+# to make sure the code did what it was intended to
+linelist_surv %>% 
+  tabyl(outcome, event)
+```
+
+Check age-category assignment
+
+```{r}
+linelist_surv %>% 
+  tabyl(age_cat_small, age_cat)
+```
+
+and lets look at the full dataset
+
+```{r}
+linelist_surv %>% 
+  select(case_id, age_cat_small, date_onset, date_outcome, outcome, event, futime) %>% 
+  head(10)
+```
+
+### Lets start form the very beggining..
+
+![](images/begining.jpg)
+
+#### Building a surv object
+
+We'll use the `Surv()` function from the `survival` package to generate a survival object using the follow-up time and event columns. This creates a `Surv` object, capturing the time data and event occurrence, which is then used in subsequent model formulas.
+
+```{r}
+# Use Suv() syntax for right-censored data
+survobj <- Surv(time = linelist_surv$futime,
+                event = linelist_surv$event)
+```
+
+Review the data
+
+```{r}
+linelist_surv %>% 
+  select(case_id, date_onset, date_outcome, futime, outcome, event) %>% 
+  head(10)
+```
+
+Here are the initial 10 entries of `survobj`. The "+" indicates right-censored observations. Notice the alignment of the numbers.
+
+```{r}
+#print the 50 first elements of the vector to see how it presents
+head(survobj, 10)
+```
+
+#### Initial Analyses
+
+We'll begin by employing the `survfit()` function from the `survival` package to generate Kaplan Meier (KM) estimates for our overall survival curve. The resultant object offers a step function representation with jumps at observed event times.
+
+> **Tip**: The Kaplan-Meier method provides a nonparametric MLE of the survival function.
+
+The summary output of this object, termed a life table, furnishes key insights: - `n.risk`: Number at risk of the event. - `n.event`: Instances where the event occurred. - From these, we derive the probability of event non-occurrence at a given time. - Additionally, the standard error and confidence interval for the derived probability are included.
+
+To fit the KM estimates: we use \~ 1 e.g. `fit <- survfit(survobj ~ 1)`
+
+```{r}
+# fit the KM estimates using a formula where the Surv object "survobj" is the response variable.
+# "~ 1" signifies that we run the model for the overall survival  
+linelistsurv_fit <-  survival::survfit(survobj ~ 1)
+
+#print its summary for more details
+summary(linelistsurv_fit)
+```
+
+While using [`summary()`](https://rdrr.io/r/base/summary.html) we can add the option `times` and specify certain times at which we want to see the survival information
+
+```{r}
+#print its summary at specific times
+summary(linelistsurv_fit, times = c(5,10,20,30,60))
+```
+
+Utilizing the `print()` function, along with the argument `print.rmean = TRUE`, allows us to obtain the mean survival time and its standard error.
+
+```{r}
+# print linelistsurv_fit object with mean survival time and its se. 
+print(linelistsurv_fit, print.rmean = TRUE)
+```
+
+#### Cumulative Hazard
+
+Beyond the `summary()` function, the `str()` function reveals deeper details of the `survfit()` object structure, which encompasses 16 elements.
+
+A notable element, `cumhaz`, is a numeric vector that, when plotted, displays the cumulative hazard. This hazard represents the immediate likelihood of an event taking place.
+
+> **Note**: Hazard refers to the instantaneous event occurrence rate.
+
+```{r}
+str(linelistsurv_fit)
+```
+
+#### Kaplan-Meier Curves
+
+Post fitting the KM estimates, the ensuing step involves visualizing the likelihood of survival across a specific time span. Leveraging the standard plot() function, we're able to craft the "Kaplan-Meier curve". This curve serves as a graphical representation of the survival patterns within the entire cohort.
+
+Lets get a quick and dirty plot
+
+```{r}
+plot(linelistsurv_fit, 
+     xlab = "Days of follow-up",    # x-axis label
+     ylab="Survival Probability",   # y-axis label
+     main= "Overall survival curve" # figure title
+     )
+```
+
+A simple interpretaion would be:
+
+-   Initially, survival probability stands at 100% since all subjects are alive.
+
+-   As time progresses and events occur, this probability diminishes.
+
+-   By the 60-day mark, roughly 40% of the cohort remains alive.
+
+The confidence interval of the KM survival estimates are also plotted by default and can be dismissed by adding the option `conf.int = FALSE` to the [`plot()`](https://rdrr.io/r/graphics/plot.default.html) command.
+
+Since the event of interest is "death", drawing a curve describing the complements of the survival proportions will lead to drawing the cumulative mortality proportions. This can be done with [`lines()`](https://rdrr.io/r/graphics/lines.html), which adds information to an existing plot.
+
+```{r}
+# original plot
+plot(
+  linelistsurv_fit,
+  xlab = "Days of follow-up",       
+  ylab = "Survival Probability",       
+  mark.time = TRUE,              # mark events on the curve: a "+" is printed at every event
+  conf.int = FALSE,              # do not plot the confidence interval
+  main = "Overall survival curve and cumulative mortality"
+  )
+
+# draw an additional curve to the previous plot
+lines(
+  linelistsurv_fit,
+  lty = 3,             # use different line type for clarity
+  fun = "event",       # draw the cumulative events instead of the survival 
+  mark.time = FALSE,
+  conf.int = FALSE
+  )
+
+# add a legend to the plot
+legend(
+  "topright",                               # position of legend
+  legend = c("Survival", "Cum. Mortality"), # legend text 
+  lty = c(1, 3),                            # line types to use in the legend
+  cex = .85,                                # parametes that defines size of legend text
+  bty = "n"                                 # no box type to be drawn for the legend
+  )
+```
+
+#### Comparing curves
+
+For assessing survival variations across distinct participant groups, one typically visualizes the respective survival curves and subsequently tests for group differences. These groups can stem from factors like gender, age, or treatment.
+
+##### Log Rank Test
+
+A renowned test, the log rank test, gauges the overall survival experience among multiple groups. It essentially tests if survival curves between groups overlap. Using \`survdiff()\` with \`rho = 0\`, we can perform the test. The result offers a chi-square statistic with its accompanying p-value.
+
+To illustrate, let's compare survival based on gender. This involves plotting the survival curves for each gender and subsequently assessing overlap through the log rank test.
+
+By supplying `~ gender` as the right side of the formula, we no longer plot the overall survival but instead by gender.
+
+```{r}
+# create the new survfit object based on gender
+linelistsurv_fit_sex <-  survfit(Surv(futime, event) ~ gender, data = linelist_surv)
+```
+
+Now we can plot the survival curves by gender. Have a look at the *order* of the strata levels in the gender column before defining your colors and legend.
+
+```{r}
+# set colors
+col_sex <- c("lightgreen", "darkgreen")
+
+# create plot
+plot(
+  linelistsurv_fit_sex,
+  col = col_sex,
+  xlab = "Days of follow-up",
+  ylab = "Survival Probability")
+
+# add legend
+legend(
+  "topright",
+  legend = c("Female","Male"),
+  col = col_sex,
+  lty = 1,
+  cex = .9,
+  bty = "n")
+```
+
+And now we can compute the test of the difference between the survival curves using `survdiff()`
+
+```{r}
+#compute the test of the difference between the survival curves
+survival::survdiff(
+  Surv(futime, event) ~ gender, 
+  data = linelist_surv
+  )
+```
+
+The survival curves for women and men overlap, and the log-rank test suggests no significant difference in survival between the genders.
+
+For a comprehensive visualization and test, the `ggsurvplot()` function from the `survminer` package can be utilized. This not only plots survival curves for different groups but also provides risk tables and the p-value from the log-rank test.
+
+```{r}
+survminer::ggsurvplot(
+    linelistsurv_fit_sex, 
+    data = linelist_surv,          # again specify the data used to fit linelistsurv_fit_sex 
+    conf.int = FALSE,              # do not show confidence interval of KM estimates
+    surv.scale = "percent",        # present probabilities in the y axis in %
+    break.time.by = 10,            # present the time axis with an increment of 10 days
+    xlab = "Follow-up days",
+    ylab = "Survival Probability",
+    pval = T,                      # print p-value of Log-rank test 
+    pval.coord = c(40,.91),        # print p-value at these plot coordinates
+    risk.table = T,                # print the risk table at bottom 
+    legend.title = "Gender",       # legend characteristics
+    legend.labs = c("Female","Male"),
+    font.legend = 10, 
+    palette = "Dark2",             # specify color palette 
+    surv.median.line = "hv",       # draw horizontal and vertical lines to the median survivals
+    ggtheme = theme_light()        # simplify plot background
+)
+```
+
+### Cox regression
+
+Cox regression is a key method for survival analysis, but it requires important assumptions like the proportional hazards assumption.
+
+The model evaluates the hazard rate, the risk of an event at a specific time given survival up to that time. The hazard ratio (HR) measures the effect:
+
+-   HR close to 1: No effect on survival.
+
+-   HR less than 1: Improved survival.
+
+-   HR greater than 1: Decreased survival
+
+#### Running a model
+
+Using the `cox.ph()` function from the `survival` package, we assess the impact of age and gender on survival. Key outputs include:
+
+-   Estimated coefficients and their hazard ratios.
+
+-   Standard errors, z-scores, and p-values.
+
+```{r}
+#fitting the cox model
+linelistsurv_cox_sexage <-  survival::coxph(
+              Surv(futime, event) ~ gender + age_cat_small, 
+              data = linelist_surv
+              )
+
+
+#printing the model fitted
+linelistsurv_cox_sexage
+```
+
+Check out the model in more detail
+
+```{r}
+#summary of the model
+summary(linelistsurv_cox_sexage)
+
+```
+
+#### Handling Ties in Survival Analysis
+
+In survival analysis, ties refer to situations where two or more individuals experience the event of interest at the exact same time. How these ties are handled can impact the results of the analysis, especially in datasets where ties are frequent.
+
+When computing the Cox model, the \`method\` argument dictates how ties are addressed:
+
+-   Efron (default): An approximation often used in datasets with a modest number of ties. It averages over the ranks of tied events.
+
+-   Breslow: Simplifies the calculation by treating the tied events as though they occurred at slightly different times. It can be viewed as a form of data smoothing.
+
+-   Exact: As the name suggests, this method does an exact calculation for ties, but it can be computationally intensive, especially with large numbers of ties.
+
+The chosen method should ideally be based on the nature of the data and the frequency of ties, as well as computational considerations.
+
+#### Checking on your assumptions
+
+We can verify our model using a signficance test
+
+```{r}
+#test the proportional hazard model
+linelistsurv_ph_test <- cox.zph(linelistsurv_cox_sexage)
+linelistsurv_ph_test
+```
+
+The graphical verification of this assumption may be performed with the function `ggcoxzph()` from the **survminer** package.
+
+```{r}
+survminer::ggcoxzph(linelistsurv_ph_test)
+```
+
+#### Forest plot your findings
+
+We can then visualize the results of the cox model using the practical forest plots with the `ggforest()` function of the **survminer package**.
+
+```{r}
+ggforest(linelistsurv_cox_sexage, data = linelist_surv)
+```
+
+### Bonus material
+
+#### Stratified model
+
+Lets define another model
+
+```{r}
+#fit the model
+linelistsurv_cox <-  coxph(
+                        Surv(futime, event) ~ gender + age_years+ source + days_onset_hosp,
+                        data = linelist_surv
+                        )
+
+
+#test the proportional hazard model
+linelistsurv_ph_test <- cox.zph(linelistsurv_cox)
+linelistsurv_ph_test
+```
+
+Oh. Theres non proportionality- how can we handle that- using stratification of course
+
+```{r}
+#fit the model
+linelistsurv_cox <-  coxph(
+                        Surv(futime, event) ~ gender + age_years+ source + strata(days_onset_hosp),
+                        data = linelist_surv
+                        )
+
+
+#test the proportional hazard model
+summary(linelistsurv_cox)
+```
+
+Notice anything different?
+
+#### Time-dependent covariates
+
+Cox regression usually considers baseline covariates, but what about covariates measured during follow-up or those that change over time, like repeated clinical lab values? These are termed Time Dependent Covariates. The Cox model, with tools from the \`survival\` package, can be adapted to handle this.
+
+Using them requires a unique dataset structure. For a detailed method, refer to this [paper](https://cran.r-project.org/web/packages/survival/vignettes/timedep.pdf)
+
+Consider the BMT dataset from the `SemiCompRisks` package. It has data on 137 bone marrow transplant patients with variables like:
+
+-   T1: Time (in days) to death/last follow-up.
+
+-   delta1: Death indicator; 1 if dead, 0 if alive.
+
+-   TA: Time to acute graft-versus-host disease.
+
+-   deltaA: Indicator for the disease; 1 if developed, 0 if not.
+
+To access the BMT dataset, use the \`data()\` function after loading the relevant package. The BMT dataframe will be available in your R workspace.
+
+```{r}
+data(BMT, package = "SemiCompRisks")
+```
+
+Add in a unique identifier for each patient
+
+```{r}
+bmt <- rowid_to_column(BMT, "my_id")
+```
+
+Using the `tmerge()` function, along with `event()` and `tdc()` helpers, we'll reformat our dataset. Each patient will have rows corresponding to changes in their `deltaA` value. Thus, a patient might have up to two rows based on the occurrence of acute graft-versus-host disease. The new indicator for this disease will be `agvhd`.
+
+`tmerge()`: Transforms the dataset to a long format where each patient can have multiple time intervals based on covariate changes. `event()`: Sets the event indicator for these new time intervals. `tdc()`: Constructs the time-dependent covariate, `agvhd`, for the new intervals.
+
+```{r}
+td_dat <- 
+  tmerge(
+    data1 = bmt %>% dplyr::select(my_id, T1, delta1), 
+    data2 = bmt %>% dplyr::select(my_id, T1, delta1, TA, deltaA), 
+    id = my_id, 
+    death = event(T1, delta1),
+    agvhd = tdc(TA)
+    )
+
+```
+
+Look at the original
+
+```{r}
+bmt %>% 
+  dplyr::select(my_id, T1, delta1, TA, deltaA) %>% 
+  filter(my_id %in% seq(1, 5))
+```
+
+Lets look at what `tmerge()` has done
+
+```{r}
+td_dat %>% 
+  filter(my_id %in% seq(1, 5))
+```
+
+##### Time-dependent Cox Regression
+
+After restructuring our data and introducing the `agvhd` time-dependent variable, we can fit a Cox regression model. Using the `coxph()` function, adjust the `Surv()` function to indicate both the beginning and end of each interval with `time1=` and `time2=` arguments.
+
+```{r}
+bmt_td_model = coxph(
+  Surv(time = tstart, time2 = tstop, event = death) ~ agvhd, 
+  id=my_id,
+  data = td_dat
+  )
+
+summary(bmt_td_model)
+```
+
+### Acknowledgements
+
+Material for this lecture was borrowed and adopted from
+
+-   [The Epidemiologist R Handbook](https://epirhandbook.com/en/index.html)

@@ -1,0 +1,143 @@
+---
+title: "tutorial_advDataViz"
+author: "Vivek Jason"
+editor: visual
+---
+
+### Tutorial 1: Building a contour map in `ggplot()`
+
+Step 1: Load Necessary libraries
+
+Step 2: Convert your Spatial Data to Data Frames. You must convert spatial data ( `mys_health`) to data frames to work with ggplot2. Extra step! Check out `st_coordinates` on how to get this done.
+
+Step 3: Base Map with Administrative Boundaries. Begin by creating a base map using ggplot2 with the administrative boundaries.
+
+Step 4: Add Healthcare Facilities as Points. Next, overlay the healthcare facility points on the base map.
+
+Step 5: Generate a Contour Plot. Finally, add contours to the plot around the healthcare facility points. Adjust the parameters like `size`, `color`, and `alpha` to refine the visual representation as needed.
+
+```{r}
+#step 1
+library(ggplot2)
+library(ggmap)
+library(sp)
+library(sf)
+
+#Step 2
+# Convert the sf object to a data frame
+mys_health_df <- data.frame(st_coordinates(mys_health))  # Extract points to data frame
+
+#step 3
+gg <- ggplot(data=mys_map) +
+  geom_sf() +
+  theme_minimal()
+
+#step 4
+gg <- gg + geom_point(data = mys_health_df, 
+             aes(x = X, y = Y), color = 'blue', size = 0.08, alpha = 0.5) 
+
+#ste[ 5
+gg <- gg + stat_density_2d(
+        data = mys_health,
+        aes(
+          x = X,
+          y = Y,
+          fill = ..level..,
+          alpha = ..level..),
+        bins = 10,
+        geom = "polygon",
+        contour_var = "count",
+        show.legend = F)
+
+print(gg)
+
+#step 6
+gg <-  gg + labs(title = "Distribution of Healthcare facilities") + 
+  coord_sf(xlim = c(100.8, 101.9), ylim = c(2.8, 3.7), expand = FALSE) +
+  theme_minimal()
+```
+
+### Tutorial 2: Time Series Choropleth in ggplot2
+
+Step 1 Load Necessary Libraries
+
+Step 2: Data Aggregation. Aggregate the number of deaths by state from the dataset c19_df.
+
+Step 3: Merge Data with Spatial Data:. You need to merge the deaths data frame with your spatial data (mys_deaths). This ensures that each spatial unit (state) has its corresponding death count.
+
+Step 4: Base Choropleth. Create a choropleth using ggplot2.
+
+Step 5: Add visual improvements to make the map more informative and appealing. These can include:
+
+-   Legend Adjustments: To make the legend more informative.
+
+-   Theme Adjustments: To clean up axes, grids, and background.
+
+-   Text Annotations: To highlight certain areas or provide additional context.
+
+```{r}
+#step 1
+library(ggplot2)
+library(dplyr)
+
+#step 2
+deaths <- c19_df %>%
+  mutate(year=year(date)) %>%
+  select(state, year) %>%
+  group_by(state, year) %>%
+  summarise(deaths=n()) %>%
+  ungroup()
+
+#step 3
+mys_deaths <- left_join(mys_map, deaths, by = c("shapeName"="state"))
+
+#step 4
+gg <- ggplot(data = mys_deaths) +
+  geom_sf(aes(fill = deaths)) +
+  scale_fill_continuous(high = "#54278f", low = "#f2f0f7") +
+  theme_bw() +
+  labs(title = "Number of deaths, by administrative unit",
+       subtitle = "Admin level 1") + 
+  facet_wrap(~year, ncol=3)
+
+#step 5
+gg <- gg +
+  theme(legend.position = "bottom",  # position the legend at the bottom
+        legend.title = element_text(face = "bold"),  # bold legend title
+        axis.title = element_blank(),  # remove axis titles
+        axis.text = element_blank(),  # remove axis text
+        axis.ticks = element_blank(),  # remove axis ticks
+        panel.grid = element_blank()) +  # remove grid
+  annotate("text", x = 101, y = 3, label = "Note: Data aggregated by year.", size = 3)  # add a note
+
+print(gg)
+
+```
+
+### Tutorial 3: Bring epidemiologic curves to life
+
+Step 1: Data Preparation. Load your dataset into R, making sure the `date` column is in the Date format. Group your data by `date` and `state`. For each unique combination of `date` and `state`, calculate the number of cases.
+
+Step 2: Create the Initial Plot with ggplot2. Use the `ggplot()` function from the `ggplot2` package to create a line plot. The x-axis will represent the `date`, the y-axis will represent the `counts`, and the lines will be colored by `state`.
+
+Step 3: Convert to an Interactive Plot. Convert your static `ggplot2` plot into an interactive plot using the `ggplotly()` function from the `plotly` package.
+
+```{r}
+#Step 1
+epi_data <- c19_df %>%
+  group_by(date, state) %>%
+  summarize(counts = n()) %>%
+  ungroup()
+
+#step 2
+p <- ggplot(epi_data, aes(x = date, y = counts, fill = state)) +
+  geom_col() +
+  labs(title = "Epi Curve by State", x = "Date", y = "Counts") +
+  theme_minimal()
+
+#step 3
+interactive_plot <-  p %>% 
+  plotly::ggplotly() 
+interactive_plot
+
+```

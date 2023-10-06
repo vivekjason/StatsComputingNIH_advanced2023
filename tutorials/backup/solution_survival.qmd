@@ -1,0 +1,218 @@
+---
+title: "SuRviving: A Dive into Survival Analysis"
+author: "Vivek Jason"
+editor: visual
+---
+
+### Task 1: KM curves
+
+**Step 1**
+
+Objective: test for differences in survival by the source of infection (source of contamination). Fit the survival model using the `survfit()` function from the `survival` package. Set your survival object (created using the `Surv()` function) as the response variable. Here, the model is fit based on the variable `source` to understand differences in survival between groups.
+
+**Step 2**
+
+Use ggsurvplot for Visualization: Utilize the `ggsurvplot()` function from the `survminer` package to visualize the Kaplan-Meier survival curve.
+
+**Step 3**
+
+Customize the Plot:
+
+-   Define line aesthetics with `size` and `linetype`.
+
+-   Show the confidence interval with `conf.int = T`.
+
+-   Scale survival probabilities in percentages using `surv.scale = "percent"`.
+
+-   Break the time axis in intervals of 10 days with `break.time.by = 10`.
+
+-   Label your x and y axes using `xlab` and `ylab`.
+
+**Step 4**
+
+Adjust Risk Table and Legend:
+
+-   Include a risk table below the plot using `risk.table = T`.
+
+-   Customize the legend title, labels, and font with `legend.title`, `legend.labs`, and `font.legend`.
+
+-   Choose your desired color palette with `palette`.
+
+**Step 5**
+
+Final Styling:
+
+-   Show median survival with a vertical and horizontal line using `surv.median.line = "hv"`.
+
+-   Apply a light theme with `ggtheme = theme_light()`.
+
+```{r}
+# Step 1: Fit the Survival Model
+linelistsurv_fit_source <-  survfit(
+  Surv(futime, event) ~ source,
+  data = linelist_surv
+  )
+
+# Step 2: Use ggsurvplot for Visualization
+ggsurvplot( 
+  linelistsurv_fit_source,
+  data = linelist_surv,
+  
+  # Step 3: Customize the Plot
+  size = 1,                      # Define line width
+  linetype = "strata",           # Set line type based on strata (source in this case)
+  conf.int = T,                  # Display confidence interval
+  surv.scale = "percent",        # Show survival probability as a percentage
+  break.time.by = 10,            # Interval for x-axis ticks
+  xlab = "Follow-up days",       # x-axis label
+  ylab= "Survival Probability",  # y-axis label
+  pval = T,                      # Display p-value on the plot
+  pval.coord = c(40,.91),        # Set coordinates for displaying the p-value
+
+  # Step 4: Adjust Risk Table and Legend
+  risk.table = T,                # Display risk table below the plot
+  legend.title = "Source of \ninfection", # Legend title
+  legend.labs = c("Funeral", "Other"),    # Legend labels
+  font.legend = 10,              # Font size for legend
+  palette = c("#E7B800","#3E606F"),      # Color palette for the curves
+  
+  # Step 5: Final Styling
+  surv.median.line = "hv",       # Add vertical & horizontal line for median survival
+  ggtheme = theme_light()        # Apply a light theme for the plot
+)
+
+```
+
+### Task 2 : Build a Cox Model
+
+**Objective**
+
+Understand and perform survival analysis on the colon dataset, a built-in dataset in R. This dataset contains survival and recurrence information on 929 individuals from a clinical trial on colon cancer chemotherapy.
+
+**Step 1**
+
+Loading and Preprocessing Data
+
+-   Load the colon dataset from the survival library.
+
+-   Convert the colon dataset to a tibble.
+
+-   Filter the dataset to keep only survival data (where etype is equal to 2).
+
+-   Name this new dataset colondeath.
+
+**Step 2**
+
+Exploration of Data
+
+-   Use ?colon to check the coding for the sex and status variables.
+
+-   Compare this coding to the lung dataset (if available). Fit a survival curve based on gender using the survfit function.
+
+-   Name the resulting object sfit.
+
+-   Then run summary on sfit at specified time points (0, 500, 1000, 1500, and 2000).
+
+**Step 3**
+
+Visualizing Survival Curves
+
+-   Load the survminer package.
+
+-   Plot a Kaplan-Meier survival curve for the data using ggsurvplot.
+
+-   Include confidence intervals and the p-value on the plot.
+
+**Step 4**
+
+Cox Proportional-Hazards Regression
+
+-   Examine the levels of the rx variable in colondeath to understand treatment types.
+
+-   Run a Cox PH regression model against the rx variable to assess the impact of different treatments on survival.
+
+-   Fit another Cox regression model considering additional covariates - age, sex, and nodes.
+
+-   Interpret the results focusing on the likelihood ratio test.
+
+**Step 5**
+
+Reporting Results
+
+-   Load the gtsummary package.
+
+-   Use the tbl_regression function from gtsummary to generate a summary table for your Cox regression model.
+
+```{r}
+# -----------------------------
+# Step 1: Loading and Preprocessing Data
+# -----------------------------
+
+# Load necessary libraries
+library(dplyr)
+
+# Convert the colon dataset to a tibble for easier data manipulation
+colon <- as_tibble(colon)
+
+# Filter out the dataset to only include rows where etype is equal to 2, which corresponds to survival data
+colondeath <- filter(colon, etype==2)
+
+# -----------------------------
+# Step 2: Exploration of Data
+# -----------------------------
+
+# View the coding for the sex and status variables in the colon dataset
+# Note: Students should also compare with the lung dataset if available
+?colon
+
+# Fit a survival curve based on gender (male vs. female)
+# We're naming the resulting object as sfit
+sfit <- survfit(Surv(time, status) ~ sex, data=colondeath)
+
+# Obtain a summary of sfit at specific time points to assess survival rates
+summary(sfit, times=c(0, 500, 1000, 1500, 2000))
+
+# -----------------------------
+# Step 3: Visualizing Survival Curves
+# -----------------------------
+
+# Load the required library for visualizing survival curves
+library(survminer)
+
+# Plot a Kaplan-Meier survival curve for the sfit data with confidence intervals and p-value
+ggsurvplot(sfit, conf.int = TRUE, pval = TRUE)
+
+# Further visualizations can be added by stratifying based on other variables, 
+# such as differentiation extent and detectable cancer presence in lymph nodes.
+
+# -----------------------------
+# Step 4: Cox Proportional-Hazards Regression
+# -----------------------------
+
+# Examine the types of treatments available in the dataset using the rx variable
+levels(colondeath$rx)
+
+# Fit a Cox Proportional-Hazards regression model based on treatment type
+cox_model <- coxph(Surv(time, status) ~ rx, data=colondeath)
+
+# Display a summary of the model results to see the impact of treatments
+summary(cox_model)
+
+# Fit another Cox regression model, but this time, add more covariates like age, sex, and the number of nodes with detectable cancer
+cox_model_extended <- coxph(Surv(time, status) ~ rx + age + sex + nodes, data=colondeath)
+
+# Display a summary of this extended model
+summary(cox_model_extended)
+
+# -----------------------------
+# Step 5: Reporting Results
+# -----------------------------
+
+# Load the required library for generating detailed and well-formatted summary tables
+library(gtsummary)
+
+# Generate a comprehensive summary table for the cox_model_extended. 
+# This table will present the results in an easily interpretable format.
+tbl_regression(cox_model_extended, exponentiate = TRUE)
+
+```

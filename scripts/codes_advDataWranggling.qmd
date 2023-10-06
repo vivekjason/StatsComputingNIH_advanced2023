@@ -1,0 +1,842 @@
+---
+title: "Moving forward with Data Wrangling"
+author: "Vivek Jason"
+editor: visual
+---
+
+## Loading packages
+
+Lets load some important packges. In an earlier session we utilised a custom function to load multiple functions but here we are going to use the `p_load()` function from the **pacman** package which is smarter than base `install.packages()` and `library()` combo- in that it does reinstall a package if it is already on your system.
+
+```{r}
+pacman::p_load(
+     rio,          # import function without /
+     purrr,        # iteration
+     tidyverse,    # data management and visualization
+     incidence2,   # create epicurve objects
+     writexl,      # write Excel file with multiple sheets
+     readxl,        # import Excel with multiple sheets
+     here           # make calling folders 
+)
+```
+
+## Importing some data
+
+For the purposes of this session lets utilise the Malaysian COVID-19 deaths c19_dfs maintained by the Ministry of Health on their [Github page](https://github.com/MoH-Malaysia). Codes for each column are as follows:
+
+1.  `date`: yyyy-mm-dd format; date of death
+
+2.  `date_announced`: date on which the death was announced to the public (i.e. registered in the public c19_df)
+
+3.  `date_positive`: date of positive sample
+
+4.  `date_doseN`: date of the individual's first/second/third dose (if any)
+
+5.  `brandN`: `p` = Pfizer, `s` = Sinovac, `a` = AstraZeneca, `c` = Cansino, `m` = Moderna, `h` = Sinopharm, `j` = Janssen, `u` = unverified (pending sync with VMS)
+
+6.  `state`: state of residence
+
+7.  `age`: age as an integer; note that it is possible for age to be 0, denoting infants less than 6 months old
+
+8.  `male`: binary variable with 1 denoting male and 0 denoting female
+
+9.  `bid`: binary variable with 1 denoting brought-in-dead and 0 denoting an inpatient death
+
+10. `malaysian`: binary variable with 1 denoting Malaysian and 0 denoting non-Malaysian
+
+11. `comorb`: binary variable with 1 denoting that the individual has comorbidities and 0 denoting no comorbidities declared
+
+Lets call in the dataset
+
+```{r}
+c19_df <- read.csv("https://raw.githubusercontent.com/MoH-Malaysia/covid19-public/main/epidemic/c19_df/c19_df_deaths.csv")
+```
+
+Lets just do some quick cleaning so we can work on the data laters
+
+```{r}
+c19_df <- c19_df %>% 
+  mutate(across(where(is.character), na_if, ""),#look at all character columns and change "" empty cells to NA
+         across(contains("brand"), ~replace_na(na_if(.,"NA"),"unvaccinated")),#replace all NA cells in brand columns to unvaccinated
+         across(contains("date"), ~as.Date(., format = "%Y-%m-%d")),#change character to dates\ fromat
+  
+         duration_toDeath=as.numeric(date-date_positive)) #create a rabdom second continuous variable
+```
+
+# Loops
+
+### Basic Syntax
+
+A for loop runs for a predetermined number of times. The structure of a for loop in R is:
+
+```{r}
+for (item in sequence) {
+  # operations using the item
+}
+```
+
+## `for` loops
+
+A `for` loop is one of the most commonly used loops in R. Here's a breakdown of its components:
+
+1.  **The sequence of items to iterate through**: This is a set of values that the loop will go through one-by-one.
+
+2.  **The operations to conduct per item in the sequence**: These are the actions that will be performed on each individual item of the sequence.
+
+3.  **The container for the results (optional)**: Not all loops store their results, but if you want to keep track of outcomes from each iteration, you'll use a container (like a vector or a list) to store these.
+
+So lets break it down with a simple example:
+
+```{r}
+for (num in c(1,2,3,4,5)) {  # the SEQUENCE is defined (numbers 1 to 5) and loop is opened with "{"
+  print(num + 2)             # The OPERATIONS (add two to each sequence number and print)
+}                            # The loop is closed with "}"                            
+```
+
+#### Sequence
+
+A `for` loop iterates operations over each item in a sequence. This sequence can be a set of distinct values (like column names or disease names) or a series of numbers (1,2,3,...).
+
+The basic format is: `item in vector`.
+
+1.  "item" can be any label you choose (e.g., "i", "num", "loc"). It represents the current value in the loop iteration.
+2.  The vector consists of the values you're looping over. This could be character strings, column names, or numbers.
+
+In each iteration, "item" assumes the value of the current item in the vector and can be used within the loop's operations.
+
+Examples of a how a sequence runs:
+
+1.  a '`for` loop' with character sequence
+
+    ```{r}
+    ## create a vector of the state names
+    state_names <- unique(c19_df$state)
+    state_names # print
+
+    #run a  loop across that sequence
+    for (state in state_names){       # sequence
+      
+           # OPERATIONS HERE
+    }
+    ```
+
+2.  a '`for` loop' across a sequence of columns
+
+    ```{r}
+    ## sequence across column names
+    for (col in names(c19_df)){        # loop runs for each column in c19_df; column name represented by "col" 
+      
+      # Example operations code - print number of missing values in column
+      print(sum(is.na(c19_df[[col]])))  # c19_df is indexed by current value of "col"
+         
+    }
+    ```
+
+3.  a '`for` loop' across a sequence of numbers
+
+    ```{r}
+    for (i in 1:nrow(c19_df)) {  # use on a data frame
+      # OPERATIONS HERE
+    }  
+    ```
+
+#### Operations
+
+Inside the curly brackets `{ }` of the `for` loop is the code executed for each "item" in the sequence. Ensure that any code dependent on "item" is correctly indexed, often using `[[ ]]`.
+
+For instance, while iterating through a 'c19_df', we can combine gender and age for each row and store them in `cases_demographics`. We use `[[i]]` to ensure each loop's result goes to the right spot in our container vector.
+
+```{r}
+# create container to store results - a character vector
+cases_demographics <- vector(mode = "character", length = nrow(c19_df))
+
+# the for loop
+for (i in 1:nrow(c19_df)){
+  
+  # OPERATIONS
+  # extract values from c19_df for row i, using brackets for indexing
+  row_gender  <- c19_df$male[[i]]
+  row_age     <- c19_df$age[[i]]    # don't forget to index!
+     
+  # combine gender-age and store in container vector at indexed location
+  cases_demographics[[i]] <- str_c(row_gender, row_age, sep = ",") 
+
+}  # end for loop
+
+# display first 10 rows of container
+head(cases_demographics, 10)
+```
+
+To test your loop, temporarily assign a value to "item" (e.g., i \<- 10). Outside the loop, run the operations code to verify it produces the expected results.
+
+#### Container
+
+For loop results can be displayed or saved in a "container" like a vector, data frame, or list. Before starting the loop, prepare an empty container using vector(), matrix(), or data.frame().
+
+1.  Empty vector
+
+    ```{r}
+    vec <- vector(
+      mode = "double",                            # we expect to store numbers
+      length = length(unique(c19_df$states))) # the number of unique states in the dataset
+    ```
+
+2.  Empty dataframe
+
+    ```{r}
+    df <- data.frame(matrix(ncol = 2, nrow = 3))
+    ```
+
+3.  Empty list
+
+    ```{r}
+    list <- vector(mode = "list", length = 16)
+    ```
+
+#### Looping to create multiple plots
+
+Lets first create a basic epidemiologic curve of deaths due to COVID-19 in Malaysia. We can use the incidence package to quickly do this:
+
+```{r}
+# create 'incidence' object
+outbreak <- incidence(   
+     x = c19_df,                   # dataframe - complete c19_df
+     date_index = "date",        # date column
+     interval = "week",              # aggregate counts weekly
+     groups = "male")               # group values by gender
+     #na_as_group = TRUE)             # missing gender is own group
+
+# epidemic plot
+ggplot(outbreak, # incidence object
+        aes(x = date_index, # aesthetics of x and y axis
+            y = count, 
+            fill = male), # Fill colour of bars by gender
+       color = "black"      # Contour colour of bars
+       ) +  
+     geom_col() + 
+     facet_wrap(~male) +
+     theme_bw() + 
+     labs(title = "Outbreak of all cases", #titre
+          x = "Counts", 
+          y = "Date", 
+          fill = "Gender", 
+          color = "Gender")
+```
+
+Now we can rcreate epid curves of the same dimensions across all states in Malaysia using a for loop:
+
+```{r}
+# make vector of the state names
+state_names <- unique(c19_df$state)
+
+# for each name ("loc") in state_names, create and print the epi curve
+for (loc in state_names) {
+     
+     # create incidence object specific to the current state
+     outbreak_loc <- incidence(
+          x = c19_df %>% filter(state == loc),   # c19_df is filtered to the current state
+          date_index = "date",
+          interval = "week", 
+          groups = "male"#,
+          #na_as_group = TRUE
+     )
+     
+      plot_loc <- ggplot(outbreak_loc, # incidence object name
+                         aes(x = date_index, #axes
+                             y = count, 
+                             fill = male), # fill colour by gender
+                         color = "black"      # colour of bar contour
+                         ) +  
+          geom_col() + 
+          facet_wrap(~male) +
+          theme_bw() + 
+          labs(title = stringr::str_glue("Epidemic of cases admitted to {loc}"), #title
+               x = "Counts", 
+               y = "Date", 
+               fill = "Gender", 
+               color = "Gender")
+     
+     #print the plot for states
+     print(plot_loc)
+     
+} # end the for loop when it has been run for every state in state_names 
+```
+
+### `while` Loop
+
+A `while` loop runs as long as a certain condition is true.
+
+```{r}
+while (condition) {
+  # code to execute
+}
+```
+
+#### illustrating `while` loops
+
+Using a `while` loop, we can count how many deaths occurred above a certain age.
+
+```{r}
+ages <- c(34, 60, 58)#define random ages
+count <- 0#set the index count
+i <- 1#set the index for counting process
+threshold_age <- 50# set an arbitrary age threshold
+
+#create a while loop
+while (i <= length(ages)) {
+  if (ages[i] > threshold_age) {
+    count <- count + 1
+  }
+  i <- i + 1
+}
+
+count
+
+```
+
+### `repeat` Loop
+
+A `repeat` loop runs as long as a certain condition is true.
+
+```{r}
+repeat {
+  # code to execute
+  if (condition) {
+    break
+  }
+}
+```
+
+#### illustrating `repeat` loops
+
+Using a `repeat` loop, we can find the first death that occurred above a certain age.
+
+```{r}
+ages <- c(34, 60, 58)
+i <- 1
+threshold_age <- 50
+
+repeat {
+  if (ages[i] > threshold_age) {
+    first_death_above_threshold <- ages[i]
+    break
+  }
+  i <- i + 1
+}
+
+first_death_above_threshold
+
+```
+
+### Timing a loop
+
+For long loops, monitor progress by printing updates. Insert the following if statement inside your loop to display every 100th iteration. Replace i with your loop's "item".
+
+```{r}
+# loop with code to print progress every 100 iterations
+for (i in seq_len(nrow(c19_df))){
+
+  # print progress
+  if(i %% 100==0){    # The %% operator is the remainder
+    print(i)
+
+  }
+}
+```
+
+# `purrr` for iteration
+
+The purrr package offers a tidyverse solution to iteration. It's useful when repeating tasks across multiple inputs, like plotting for various jurisdictions or merging many files. Benefits of purrr include:
+
+-   Integration with pipes (%\>%).
+
+-   Improved error handling over traditional loops.
+
+-   Clean and concise syntax.
+
+Remember, purrr uses functional programming, so operations are wrapped in functions. It mainly operates on lists and vectors, applying functions to each element.
+
+### The `map()` function
+
+The `purrr` package's `map()` function applies a specified function to each element of a given list or vector.
+
+Syntax:
+
+\- `.x`: Inputs for iteration (e.g., vector of names, dataframe columns).
+
+\- `.f`: Function applied to each `.x` element. Optionally written after a tilde `~`.
+
+Syntax notes:
+
+-   No arguments needed for the function? Write it without parentheses or tilde (e.g., `.f = mean`).
+
+-   For constant function arguments across iterations, place them outside `.f`, like `na.rm = T` in `map(.x = my_list, .f = mean, na.rm=T)`.
+
+-   Use `.x` or `.` within `.f` to refer to the current iteration's `.x` value.
+
+-   The tilde syntax (\~) offers more control, especially if an argument's value changes each iteration: `map(.x = my_list, .f = ~mean(., na.rm = T))`.
+
+-   `map()` outputs a list. Variants like `map_dfr()`, `map_chr()`, and `map_dbl()` produce data frames, character vectors, and numeric vectors, respectively.
+
+#### Illustrating `map()` using a multisheet import problem
+
+Its pretty common to receive data in multiple sheets in an excel file. Not a problem! Iterate over the sheet using the `map()` function
+
+![](images/excel_multisheet.png){fig-align="center"}
+
+1.  Use `map()` to apply `import()` to each Excel sheet.
+
+2.  Merge the data frames with `bind_rows()`.
+
+3.  Retain the sheet name for each row in a new column.
+
+First, get the sheet names with `excel_sheets()` from the `readxl` package using the workbook's path, storing in `sheet_names`.
+
+```{r}
+sheet_names <- readxl::excel_sheets("data/wb_healthIndicators_asean.xlsx")
+```
+
+Check the names
+
+```{r}
+sheet_names
+```
+
+Using the `map()` function, we can feed names from the vector to `import()`. For Excel, `import()` takes which `= .x` as an argument to specify the sheet. As we iterate through sheet_names, `.x` takes values like "vietnam". Using `set_names()` ensures each output data frame in the list has a name. The result is saved as combined.
+
+```{r}
+combined <- sheet_names %>% 
+  purrr::set_names() %>% 
+  map(.f = ~import("data/wb_healthIndicators_asean.xlsx", which = .x))
+```
+
+Upon inspecting the output, each Excel sheet's data is named in the list.
+
+![](images/list_output.png)
+
+To finalize, we employ `bind_rows()` from `dplyr` to merge these data frames. The `.id=` argument lets us create a new column from list names. Here's the command sequence:
+
+```{r}
+sheet_names <- readxl::excel_sheets("data/wb_healthIndicators_asean.xlsx")  # extract sheet names
+ 
+combined <- sheet_names %>%                                     # begin with sheet names
+  purrr::set_names() %>%                                        # set their names
+  map(.f = ~import("data/wb_healthIndicators_asean.xlsx", which = .x)) %>%  # iterate, import, save in list
+  bind_rows(.id = "origin_sheet") # combine list of data frames, preserving origin in new column  
+
+```
+
+And now we have one data frame with a column containing the sheet of origin!
+
+![](images/df_output.png){fig-align="center"}
+
+Different versions of `map()` exist. For instance, `map_dfr()` yields a data frame instead of a list, but can't identify the data's origin.
+
+::: callout-note
+Mini tutorial #1: You turn. Try doing the same thing again but this time skip the `bind_rows().` Tip: Use `map_dfr()`
+
+```{r}
+sheet_names <- readxl::excel_sheets("data/wb_healthIndicators_asean.xlsx")  # extract sheet names
+ 
+combined <- sheet_names %>%                                     # begin with sheet names
+  purrr::set_names() %>%                                        # set their names
+  map_dfr(.f = ~import("data/wb_healthIndicators_asean.xlsx", which = .x)) # iterate, import, save in list
+```
+:::
+
+Variations like `map_chr()` and `map_dbl()` convert outputs to vectors and determine their class.
+
+`map_at()` and `map_if()` enable selective iteration. Use `map_at()` with `.at = c(-1)` to skip the first sheet, or provide specific indices or names to .at to determine which elements to process.
+
+::: callout-note
+Mini tutorial #2: You turn. Try doing the same thing again but this time do not include column 1 when pulling in the data. Tip: `Use map_at()`
+
+```{r}
+sheet_names <- readxl::excel_sheets("data/wb_healthIndicators_asean.xlsx")
+
+combined <- sheet_names %>% 
+     purrr::set_names() %>% 
+     # exclude the first sheet
+     map_at(.f = ~import( "data/wb_healthIndicators_asean.xlsx", which = .x),
+            .at = c(-1))
+```
+:::
+
+#### Custom functions
+
+To use a custom function with `map()`, consider creating epidemic curves for deaths. Using `purrr`, the `.f` function becomes `ggplot()` with its usual extensions. The plots are saved in a list and can be displayed using the `ggarrange()` function from the `ggpubr` package.
+
+```{r}
+# load package for plotting elements from list
+pacman::p_load(ggpubr)
+
+# map across the vector of 16 state "names" (created earlier)
+# use the ggplot function specified
+# output is a list with 6 ggplots
+
+state_names <- unique(c19_df$state)
+my_plots <- map(
+  .x = state_names,
+  .f = ~ggplot(data = c19_df %>% filter(state == .x)) +
+                geom_histogram(aes(x = date)) +
+                labs(title = .x)
+)
+
+# print the ggplots (they are stored in a list)
+ggarrange(plotlist = my_plots, ncol = 6, nrow = 3)
+```
+
+If the `map()` code seems complex, simplify by saving your `ggplot()` command as a custom function, say `make_epicurve()`. Use this function in `map()`, where `.x` iteratively assumes the state name, used as `state_names` in `make_epicurve()`.
+
+```{r}
+# Create function
+make_epicurve <- function(state_names){
+  
+  ggplot(data = c19_df %>% filter(state == state_names)) +
+    geom_histogram(aes(x = date)) +
+    theme_classic()+
+    labs(title = state_names)
+}
+
+# mapping
+my_plots <- map(state_names, ~make_epicurve(state_names = .x))
+
+# print the ggplots (they are stored in a list)
+ggarrange(plotlist = my_plots, ncol = 6, nrow = 3)
+
+```
+
+#### Map across columns
+
+To map a function across columns, we use `map()` with the `t.test()` function on numeric columns of the `c19_df` data frame, comparing values by gender. Remember, `t.test()` can be formatted as `t.test(numeric column ~ binary column)`. Here:
+
+-   Numeric columns from `c19_df` are the `.x` inputs to `map()`.
+-   `t.test()` is the `.f` function applied to each numeric column.
+-   In `t.test()`, `.x` is the current column, while `c19_df$male` is the binary comparison column, given statically.
+
+The result is a list of t-test results for each numeric column.
+
+```{r}
+# Results are saved as a list
+t.test_results <- c19_df %>% 
+  select(age, duration_toDeath) %>%  # keep only some numeric columns to map across
+  map(.f = ~t.test(.x ~ c19_df$male))        # t.test function, with equation NUMERIC ~ CATEGORICAL
+```
+
+In RStudio, the `t.test_results` list displays:
+
+-   The list is named `t.test_results` with two elements: `age`, and, `duration_toDeath` named after the variables tested against `male`from `c19_df`.
+
+-   Each of these elements is a list, containing items like `p.value` and `conf.int`. While some items, like `p.value`, are single numbers, others like `estimate` have multiple elements (e.g., mean for both male and female groups).
+
+    ![](images/output_ttest.png)
+
+To extract data from lists generated by `map()`, we'll use `purrr` functions with the example `t.test_results` list. This list contains 5 sub-lists, each with t-test results comparing a `c19_df` column to the binary `male` column. Use `names()` from base R on `t.test_results` to get the names of the variables tested.
+
+Use `names()` from base R on `t.test_results` to retrieve the names of the 2 variables that underwent t-tests.
+
+```{r}
+names(t.test_results)
+```
+
+Use double brackets `[[ ]]` to extract list elements by name or position. For instance, `t.tests_results[[1]]` displays the t-test results for 'age'.
+
+```{r}
+t.test_results[[1]] # first element by position
+t.test_results[[1]]["p.value"] # return element named "p.value" from first element  
+```
+
+Using `purrr` functions, `map()` and `pluck()` can achieve similar results. `pluck()` extracts elements by name or position, such as retrieving the t-test results for 'age'.
+
+```{r}
+t.test_results %>% 
+  pluck("age")        # alternatively, use pluck(1)
+```
+
+To index deeper levels, specify further levels with commas. For example, to get the "p.value" from the "age" list within "t.test_results", use commas. Numbers can replace character names.
+
+```{r}
+t.test_results %>% 
+  pluck("age", "p.value")
+```
+
+To extract inner elements from all primary elements, use `map()` with `pluck()`. For instance, to get "p.value" from each list in "t.test_results", iterate over the results using `map()`, with `pluck()` as the function, specifying "p.value".
+
+```{r}
+t.test_results %>%
+  map(pluck, "p.value")   # return every p-value
+```
+
+Using `map()`, you can directly specify the element name in quotes for extraction. The output type varies: `map()` yields a list, `map_chr()` a named character vector, and `map_dbl()` a named numeric vector.
+
+```{r}
+t.test_results %>% 
+  map_dbl("p.value")   # return p-values as a named numeric vector
+```
+
+::: callout-tip
+You can read more about [`pluck()`](https://purrr.tidyverse.org/reference/pluck.html) in it's **purrr** [documentation](https://purrr.tidyverse.org/reference/pluck.html). It has a sibling function [`chuck()`](https://purrr.tidyverse.org/reference/chuck.html) that will return an error instead of NULL if an element does not exist.
+:::
+
+#### Managing lists
+
+To convert a list of t-test results into a data frame:
+
+1.  Use `tibble()` to create a tibble, similar to a data frame. Enclose it in `{ }` to avoid saving the entire `t.test_results` as the first column.
+2.  Inside `tibble()`, define columns like in `mutate()`:
+    -   `.` denotes `t.test_results`.
+    -   Use `names()` to make a column of t-test variable names.
+    -   For the p-values column, apply `map_dbl()` to extract the `p.value` elements as a numeric vector.
+
+```{r}
+t.test_results %>% {
+  tibble(
+    variables = names(.),
+    p         = map_dbl(., "p.value"))
+  }
+```
+
+To add columns with means for males and females:
+
+1.  Extract the `estimate` element, which has two sub-elements (mean for group f and m).
+2.  Since it can't be simplified into a vector with `map_chr()` or `map_dbl()`, use `map()`. When used within `tibble()`, it creates a list-type column in the tibble.
+
+```{r}
+t.test_results %>% 
+  {tibble(
+    variables = names(.),
+    p = map_dbl(., "p.value"),
+    means = map(., "estimate"))}
+```
+
+To manage list columns in a tibble, tidyr (from tidyverse) offers:
+
+1.  `unnest_wider()` - splits each list-column element into its own column.
+2.  `unnest_longer()` - splits each list-column element into its own row.
+3.  `hoist()` - similar to `unnest_wider()` but with specific elements to unnest.
+
+For our tibble, using `unnest_wider()` on the 'means' column results in two new columns, representing the previous elements within each 'means' cell.
+
+```{r}
+t.test_results %>% 
+  {tibble(
+    variables = names(.),
+    p = map_dbl(., "p.value"),
+    means = map(., "estimate")
+    )} %>% 
+  unnest_wider(means)
+```
+
+When working with purrr lists, consider these functions to modify lists:
+
+1.  `list_modify()` - has various applications, including removing list elements.
+2.  `keep()` - retains elements based on a condition or function that returns TRUE.
+3.  `discard()` - removes elements based on a condition or function that returns TRUE.
+4.  `compact()` - eliminates all empty elements.
+
+For instance, using a list called 'combined', elements can be removed by name using `list_modify()` by setting the name to NULL.
+
+```{r}
+combined %>% 
+  list_modify("W.P Labuan" = NULL)   # remove list element by name
+```
+
+To remove list elements based on criteria, use a predicate equation with `.p =`:
+
+1.  Prefix the function with `~` and use `.x` for the list element.
+2.  With `keep()`, elements that evaluate to TRUE are retained.
+3.  With `discard()`, elements that evaluate to TRUE are removed.
+
+```{r}
+# keep only list elements with more than 500 rows
+combined %>% 
+  keep(.p = ~nrow(.x) > 500)  
+```
+
+In the below example, list elements are discarded if their class are not data frames.
+
+```{r}
+# Discard list elements that are not data frames
+combined %>% 
+  discard(.p = ~class(.x) != "data.frame")
+```
+
+Your predicate function can also reference elements/columns within each list item. For example, below, list elements where the mean of column age is over 25 are discarded.
+
+```{r}
+# keep only list elements where ct_blood column mean is over 25
+combined %>% 
+  discard(.p = ~mean(.x$age) > 25)  
+```
+
+This command would remove all empty list elements:
+
+```{r}
+# Remove all empty list elements
+combined %>% 
+  compact()
+```
+
+### Writing your own functions
+
+In R, creating functions offers benefits:
+
+1\. Enables modular programming by segmenting code into manageable pieces.
+
+2\. Avoids error-prone repetitive copy-pasting.
+
+3\. Assigns memorable names to specific code snippets.
+
+#### Anatomy of an R function
+
+Functions are a crucial component of programming in R. They allow us to encapsulate sequences of commands into single, reusable entities. Here, we will delve into the anatomy of an R function.
+
+##### Basic Structure of a Function
+
+At its core, a function in R can be thought of as a mini-program. It takes in inputs (arguments), processes them, and returns a result.
+
+```{r}
+function_name <- function(arguments) {
+    # Code to process the arguments
+    return(result)
+}
+```
+
+##### Function Name
+
+Choose a descriptive name for your function to clearly communicate its purpose.
+
+```{r}
+calculate_sum <- function(a, b) {
+    return(a + b)
+}
+```
+
+In this example, `calculate_sum` is the name of our function.
+
+##### Arguments
+
+Functions can take multiple arguments as inputs.
+
+```{r}
+calculate_sum <- function(a, b) {
+    return(a + b)
+}
+```
+
+Here, our function `calculate_sum` has two arguments: `a` and `b`.
+
+##### The Function Body
+
+This is where the core logic of your function resides. It defines what your function does.
+
+```{r}
+calculate_sum <- function(a, b) {
+    result = a + b
+    return(result)
+}
+```
+
+In this snippet, the function body is `result = a + b`.
+
+##### The Return Statement
+
+Functions typically produce some output based on the input arguments. The `return()` function ensures that the output is sent back.
+
+```{r}
+calculate_sum <- function(a, b) {
+    return(a + b)
+}
+```
+
+In this example, the function returns the sum of `a` and `b`.
+
+##### Using the Function
+
+Once you've defined a function, you can use it just like any of R's built-in functions.
+
+```{r}
+sum_result <- calculate_sum(5, 3)
+print(sum_result)  # This will print 8
+```
+
+##### Optional Arguments with Defaults
+
+You can also set default values for arguments in your function:
+
+```{r}
+calculate_sum <- function(a = 1, b = 1) {
+    return(a + b)
+}
+
+print(calculate_sum())  # This will print 2, using default values for both arguments
+print(calculate_sum(5))  # This will print 6, using 5 for `a` and the default value for `b`
+```
+
+Remember, functions are all about **modularity** and **reusability**. The more you practice, the more you'll appreciate the power and elegance they bring to your R programming.
+
+#### An example
+
+Let's try on our data. We have a COVID-19 dataset- we want to classify individuals into bins of 2 weeks. Pre-exisiting functions like `epiweek()` or `floor_date()` can handle weekly data and `month()` from lubridate can handle monthly data. So how do we classify biweekly. Let's try to go step by step on the date column which signifies date of death. This could be useful if perhaps we wanted to analyse the Delta wave deaths by every 2 weeks.
+
+First lets look at the data
+
+```{r}
+head(c19_df)
+```
+
+Next we build a bespoke function to classifiy dates.
+
+```{r}
+classify_date <- function(date) {
+  # Handle missing values first
+  if (is.na(date)) {
+    return(999)
+  }
+  
+  start_date <- as.Date("2021-04-01")#define a start of the
+  end_date <- as.Date("2021-11-30")
+  
+  if(date < start_date || date > end_date) {
+    return(999) # or return 0 if you want to categorize out-of-range dates as '0'
+  }
+  
+  # Calculate the difference in days from the start date
+  days_diff <- as.numeric(difftime(date, start_date, units = "days"))
+  
+  # Compute the 2-week period
+  period <- ceiling(days_diff / 14)
+  
+  return(period)
+}
+```
+
+Lets try running checking if it works
+
+```{r}
+c19_df <- c19_df %>% mutate(period=map_int(date, classify_date),)
+```
+
+Check what we find
+
+```{r}
+table(c19_df$period)
+```
+
+Pretty lovely eh!
+
+Now that were advanced wrangglers lets try some exercise to familiarise ourselves with what we have learned.
+
+### Acknowledgements
+
+Material for this lecture was borrowed and adopted from
+
+-   [The Epidemiologist R Handbook](https://epirhandbook.com/en/index.html)
+
+### Additional Material
+
+[R for Data Science link](https://r4ds.had.co.nz/index.html)
+
+[Cheatsheet advance R programming](https://www.rstudio.com/wp-content/uploads/2016/02/advancedR.pdf)
+
+[Cheatsheet purr Package](https://purrr.tidyverse.org/)

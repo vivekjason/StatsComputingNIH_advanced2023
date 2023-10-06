@@ -1,0 +1,195 @@
+---
+title: "Moving forward with Data Wrangling"
+author: "Vivek Jason"
+format: revealjs
+editor: visual
+---
+
+## Why the need to advance
+
+Imagine you wanted to run a univariate regression on a dataset with 25 column in...
+
+![](images/spss.png)
+
+## Computation is a superpower
+
+Repeat analyses on subgroups such as countries, districts, or age groups. These are but a few of the many situations involving *iteration*. Using iterations you will:
+
+-   implement repetitive tasks faster
+
+-   reduce the chance of error
+
+-   reduce code length
+
+## 
+
+**Advanced Data Wrangling Techniques in R**
+
+We will explore four pivotal techniques that can immensely enhance your data analysis efficiency and flexibility:
+
+1.  **Loops**:
+
+    -   Essential control structures in R, loops allow for repetitive execution of code blocks.
+
+2.  **Apply Family**:
+
+    -   A powerful alternative to loops.
+
+3.  **purrr**:
+
+    -   Part of the renowned tidyverse, purrr enhances iterative tasks by introducing a functional programming paradigm.
+
+4.  **Writing Functions**:
+
+    -   Writing custom functions allows for encapsulated, reusable logic.
+
+## Loopy loops
+
+-   **What are loops?**
+
+    -   Control structures that allow code to be executed multiple times.
+
+    -   Can iterate over sequences, vectors, or other data structures.
+
+![](images/loops.jpg){fig-align="center" width="320"}
+
+## **Types of loops in R:**
+
+## ![For Loop: Predetermined number of iterations, commonly used to iterate over elements in a sequence. While Loop: Continues as long as a specified condition is true. Repeat Loop: Executes indefinitely and must be manually exited using a condition.](images/loops.png)
+
+## **Loops in the Real World**
+
+-   **Data Transformation**
+
+-   **Simulations**
+
+-   **Automation**
+
+## **Why Not Loops?**
+
+**Considering Alternatives to Traditional Loops**
+
+-   **Pitfalls of Loops:**
+
+    -   Can be slower for large datasets.
+
+    -   Often verbose, leading to longer code.
+
+-   **Enter the Apply Family:**
+
+    -   Designed for performing operations on lists, matrices, and data frames.
+
+    -   Often faster and more concise than equivalent loops.
+
+::: callout-tip
+*Always consider whether a loop is the best tool for the job or if a vectorized approach can be utilized.*
+:::
+
+## **Meet the Family**
+
+-   **lapply():**
+
+    -   Returns a list.
+
+    -   Commonly used for list or vector operations.
+
+-   **sapply():**
+
+    -   Simplifies results from **`lapply()`** to the most basic structure possible (e.g., vector, matrix).
+
+    -   Great for quick operations without needing to deal with lists.
+
+-   **mapply():**
+
+    -   Multivariate version of **`lapply()`**.
+
+    -   Apply a function to the 1st elements of each argument, the 2nd elements, and so on.
+
+::: callout-important
+*Choosing the right function depends on the structure of your data and the desired output.*
+:::
+
+## **The Power of `purrr`**
+
+-   **What is `purrr`?**
+
+    -   An integral part of the **`tidyverse`** suite.
+
+    -   Designed for functional programming and iterative tasks in R.
+
+        ![](images/purrr.png)
+
+## **Advantages over Base R Loops:**
+
+-   **Consistency:** Offers a consistent set of tools that align well with the **`tidyverse`** ecosystem.
+
+-   **Readability:** With functions like **`map()`**, code becomes more intuitive and less cluttered.
+
+-   **Flexibility:** Able to handle various output types (**`map_dbl()`**, **`map_int()`**, **`map_df()`**, etc.) without complex restructuring.
+
+## **Complex Data Simplified with `purrr`**
+
+-   **What are List-columns & Nested Data?**
+
+    -   Data frames where each cell can contain more than one value or another data frame.
+
+    -   Arise frequently in advanced data wrangling tasks, especially when data is hierarchical or grouped.
+
+-   **`purrr`'s Approach:**
+
+    -   Makes handling and iterating over list-columns more straightforward.
+
+    -   Functions like **`map()`** can be combined with **`mutate()`** from **`dplyr`** for powerful transformations.
+
+    -   Simplify operations like extracting, modifying, or summarizing nested data without cumbersome loops.
+
+## **Embracing a New Paradigm**
+
+-   **Understanding Functional Programming:**
+
+    -   A style of programming where functions are first-class citizens -- they can be passed as arguments, returned, or stored.
+
+    -   Focuses on immutability, reducing side effects and making code more predictable.
+
+-   **Benefits in Data Analysis:**
+
+    -   **Modularity:** Write code in self-contained, reusable chunks.
+
+    -   **Clarity:** Achieve more with fewer lines of code, enhancing readability.
+
+    -   **Safety:** Less risk of unintended side effects, making debugging and validation more straightforward.
+
+## **Custom Functions in R**
+
+-   **Why Functions?**
+
+    -   Encapsulate logic for reuse.
+
+    -   Enhance code readability and maintainability.
+
+-   **Basic Structure:**
+
+    ```{r}
+    function_name <- function(arguments) {
+      # Code to execute
+      return(result)
+    }
+    ```
+
+## **Understanding Function Components**
+
+-   **Arguments:** Inputs the function requires to run.
+
+-   **Body:** The core code that gets executed.
+
+-   **Return Values:** The output produced by the function.
+
+::: callout-tip
+-   Keep functions focused on a single task.
+
+-   Use meaningful argument and function names.
+
+-   Handle potential errors or exceptions within the function.
+:::
+
+## So then.. lets get started on some code

@@ -1,0 +1,116 @@
+---
+title: "SuRviving: A Dive into Survival Analysis"
+author: "Vivek Jason"
+editor: visual
+---
+
+### Task 1: KM curves
+
+**Step 1**
+
+Objective: test for differences in survival by the source of infection (source of contamination). Fit the survival model using the `survfit()` function from the `survival` package. Set your survival object (created using the `Surv()` function) as the response variable. Here, the model is fit based on the variable `source` to understand differences in survival between groups.
+
+**Step 2**
+
+Use ggsurvplot for Visualization: Utilize the `ggsurvplot()` function from the `survminer` package to visualize the Kaplan-Meier survival curve.
+
+**Step 3**
+
+Customize the Plot:
+
+-   Define line aesthetics with `size` and `linetype`.
+
+-   Show the confidence interval with `conf.int = T`.
+
+-   Scale survival probabilities in percentages using `surv.scale = "percent"`.
+
+-   Break the time axis in intervals of 10 days with `break.time.by = 10`.
+
+-   Label your x and y axes using `xlab` and `ylab`.
+
+**Step 4**
+
+Adjust Risk Table and Legend:
+
+-   Include a risk table below the plot using `risk.table = T`.
+
+-   Customize the legend title, labels, and font with `legend.title`, `legend.labs`, and `font.legend`.
+
+-   Choose your desired color palette with `palette`.
+
+**Step 5**
+
+Final Styling:
+
+-   Show median survival with a vertical and horizontal line using `surv.median.line = "hv"`.
+
+-   Apply a light theme with `ggtheme = theme_light()`.
+
+```{r}
+
+```
+
+### Task 2 : Build a Cox Model
+
+**Objective**
+
+Understand and perform survival analysis on the colon dataset, a built-in dataset in R. This dataset contains survival and recurrence information on 929 individuals from a clinical trial on colon cancer chemotherapy.
+
+**Step 1**
+
+Loading and Preprocessing Data
+
+-   Load the colon dataset from the survival library.
+
+-   Convert the colon dataset to a tibble.
+
+-   Filter the dataset to keep only survival data (where etype is equal to 2).
+
+-   Name this new dataset colondeath.
+
+**Step 2**
+
+Exploration of Data
+
+-   Use ?colon to check the coding for the sex and status variables.
+
+-   Compare this coding to the lung dataset (if available). Fit a survival curve based on gender using the survfit function.
+
+-   Name the resulting object sfit.
+
+-   Then run summary on sfit at specified time points (0, 500, 1000, 1500, and 2000).
+
+**Step 3**
+
+Visualizing Survival Curves
+
+-   Load the survminer package.
+
+-   Plot a Kaplan-Meier survival curve for the data using ggsurvplot.
+
+-   Include confidence intervals and the p-value on the plot.
+
+**Step 4**
+
+Cox Proportional-Hazards Regression
+
+-   Examine the levels of the rx variable in colondeath to understand treatment types.
+
+-   Run a Cox PH regression model against the rx variable to assess the impact of different treatments on survival.
+
+-   Fit another Cox regression model considering additional covariates - age, sex, and nodes.
+
+-   Interpret the results focusing on the likelihood ratio test.
+
+**Step 5**
+
+Reporting Results
+
+-   Load the gtsummary package.
+
+-   Use the tbl_regression function from gtsummary to generate a summary table for your Cox regression model.
+
+```{r}
+
+
+```

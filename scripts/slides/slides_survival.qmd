@@ -1,0 +1,208 @@
+---
+title: "SuRviving: A Dive into Survival Analysis"
+author: "Vivek Jason"
+format: revealjs
+editor: visual
+---
+
+## What is Survival Analysis?
+
+-   Collection of statistical procedures.
+-   Answer questions related to survival past a time or event.
+-   Data form: time until event occurs.
+-   Convention: `time` (survival time), `event` (failure).
+
+![](images/survival_curve.png){fig-align="center" width="2000"}
+
+------------------------------------------------------------------------
+
+## Examples of Survival Analysis
+
+-   Clinical trial: Test medicine effects, time until disease.
+-   Finance: Credit model, time to client default.
+-   Economics: Unemployment duration.
+-   Industry engineering: Lifetime of products.
+
+------------------------------------------------------------------------
+
+## Types of Survival Data
+
+-   Complete data
+-   Truncation: Observations based on events.
+-   Censoring: Time of event is imprecise.
+-   Three types: right, left, and interval censoring.
+
+------------------------------------------------------------------------
+
+## More on Censoring
+
+-   Right censoring: Most common. True time \> Observed time.
+-   Left censoring: True time \< Observed time.
+-   Interval censoring: Between two observed times.
+
+![](images/censoring.jpg){width="2000"}
+
+------------------------------------------------------------------------
+
+## A note on right-censoring
+
+Time to the occurrence of a given event (e.g. death) measured from a well-defined starting point (time origin)
+
+-   e.g. Time from study enrollment to death in a cancer clinical trial
+
+The full time to death is not observed for some subjects
+
+-   Withdrawal, lost to follow-up, alive at the end of study
+
+-   All we know is the survival time is larger than the censoring time (e.g. time from study enrollment to drop out)
+
+------------------------------------------------------------------------
+
+## Goals of Survival Analysis
+
+1.  Estimate & interpret survival and hazard functions.
+
+2.  Compare survival/hazard functions.
+
+3.  Assess relationship of variables to survival time.
+
+------------------------------------------------------------------------
+
+## Data Layout
+
+-   Represented by pair `(t, d)`.
+-   `t`: time, `d`: censoring indicator.
+-   `d=1` if failure, `d=0` if censored.
+-   `x`: covariates of interest.
+
+------------------------------------------------------------------------
+
+## Survival Function
+
+-   Proportion of population still without event by time t.
+
+-   Graphed as decreasing smooth curve.
+
+-   S(t) = Pr(T \> t)
+
+    ![](images/survival_curve_concept.png)
+
+|                                           |
+|:------------------------------------------|
+| \## Estimating Survival Curves            |
+| \- Kaplan-Meier (KM) estimator used.      |
+| \- Step function, not smooth.             |
+| \- Curve jumps at observed failure times. |
+| ![](images/survival_curve2.png)           |
+
+## Hazard Function
+
+-   Alternative names: Incidence rate, Instantaneous risk.
+
+-   Instantaneous potential for event to occur.
+
+-   Values range between zero and infinity.![](images/survival_function.png)
+
+------------------------------------------------------------------------
+
+## Relative Risks
+
+-   Known as Risk ratio, Hazard ratio (RR/HR).
+
+-   Measure strength of effect on survival.
+
+-   Defined via hazard rates of treatment vs control groups.
+
+------------------------------------------------------------------------
+
+## Testing Survival Curves Differences
+
+-   Log-rank test for two survival curves.
+
+-   Stratified log-rank test for categorical variables.
+
+------------------------------------------------------------------------
+
+## Log-Rank Test
+
+-   Test equality of two survival curves.
+
+-   Statistic based on series of tables.
+
+-   Test at infinity many time points.
+
+------------------------------------------------------------------------
+
+## Cox regression
+
+![](images/paste-D471FE1D.png)
+
+------------------------------------------------------------------------
+
+## Cox regression
+
+![](images/paste-9999D4AB.png)
+
+![](images/paste-F1FB414D.png)
+
+![](images/paste-AE57A93C.png)
+
+------------------------------------------------------------------------
+
+## Cox Proportional Hazards Model
+
+-   Model setup
+
+-   The Cox PH model specifies the hazard for individual i.
+
+-   Note: There is no intercept term in the Cox model.
+
+-   Model assumption
+
+-   Proportional hazards (PH) assumption.
+
+-   PH assumption requires a constant over time
+
+-   Model interpretation
+
+------------------------------------------------------------------------
+
+## Checking Assumptions
+
+-   Deviance residual plot
+
+-   Schoenfeld resiual plot
+
+-   to check proportional hazards assumption
+
+-   randomness of residuals == proportionality
+
+------------------------------------------------------------------------
+
+## When PH Assumption is Violated
+
+1.  Stratified Cox model
+
+2.  Time-varying coefficients
+
+3.  Accelerated failure-time models (AFT)
+
+4.  Parametric survival analysis
+
+5.  Multilevel survival models etc...
+
+------------------------------------------------------------------------
+
+## Implementing survival analysis in R
+
+![](images/survival.png){fig-align="left"}
+
+------------------------------------------------------------------------
+
+## Conclusion
+
+-   Survival Analysis is crucial in various fields.
+
+-   Various methods available for estimation & testing.
+
+-   R offers comprehensive tools for survival analysis.

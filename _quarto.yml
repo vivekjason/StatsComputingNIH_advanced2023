@@ -1,0 +1,30 @@
+project:
+  type: website
+  render:
+    - "index.qmd"
+  output-dir: docs
+
+website:
+  title: "Statistical Computing in R 2023"
+  description: "Workshop website Statistical Computing in R (Intermediate to Advanced)"
+  navbar:
+    right:
+      - text: "Home"
+        file: index.qmd
+      - icon: github
+        href: https://github.com/vivekjason
+      - icon: twitter
+        href: https://twitter.com/vivekjason87
+      - icon: rss
+        href: index.xml
+    
+format:
+  html:
+    theme: lux
+    css: styles.css
+    toc: true
+
+editor: visual
+
+
+

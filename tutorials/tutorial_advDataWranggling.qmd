@@ -1,0 +1,83 @@
+---
+title: "Practical 1: Advanced Data Wranggling"
+author: "Vivek Jason"
+editor: visual
+---
+
+### **Task 1: Build a loop to run your univariate linear regression**
+
+#### **Step 1: Initialize and Prepare**
+
+1.  Before you start, understand the dataset's structure. Identify the dependent variable (in our case, 'age') and make a list of the independent variables you wish to test against it (like 'male', 'malaysian', etc.).
+
+2.  Create an empty data frame with columns to store each independent variable's name, beta coefficient, and p-value. (Tip: Use `data.frame()` to create a four column dataframe with empty cells)
+
+#### **Step 2: Setting up the Loop:**
+
+1.  Use a `for` loop to iterate over each independent variable in your list. For every loop iteration, you will perform a univariate linear regression using the dependent and independent variables.
+
+2.  Run the Regression: Inside the loop, use the linear modeling function (`lm()`) to conduct a regression. Extract the regression model summary to get the beta coefficient and p-value for the independent variable in that loop iteration.
+
+#### **Step 3: Store the Results**
+
+1.  Append the independent variable's name, beta coefficient, and p-value to the results data frame you initialized in step 1. Ensure the results are stored in the right order and format.
+
+2.  Save and Review: After the loop completes, save the results data frame to an output file, such as a CSV. Review the file to see the outcomes of each univariate regression, specifically looking at the relationship between 'age' and every other independent variable.
+
+```{r}
+
+
+```
+
+### **Task 2: Reverse the sheet trick with `purrr` by state**
+
+#### Step 1: **Extracting unique State names**
+
+1.  To efficiently store each data frame as a separate Excel sheet, we need to extract and assign unique names to each data frame in the list.
+
+#### **Step 2: Choose a Save Path**
+
+1.  Decide where to save the consolidated Excel file. In this example, we're saving it under a "data" directory and naming the file "hospital_linelists.xlsx".
+
+#### **Step 3: Use `write_xlsx` to Save Data**
+
+1.  The `write_xlsx` function from the `writexl` package allows us to save our list of data frames as separate sheets in a single Excel file.
+
+```{r}
+
+
+```
+
+### **Task 3: Build a function that predicts risk of being an unvaccinated COVID-19 death based on age, gender, nationality, and state**
+
+#### **Step 1: Understand the Task**
+
+1.  Create a logistic regression model based on specific predictors.
+
+2.  Predict the risk (probability) of unvaccinated death for new data using the model.
+
+#### **Step 2: Building the Model Function**
+
+1.  Start by defining your function. We'll name it `build_logistic_model` which will take a dataframe as its input.
+
+2.  Inside the function, use the `glm()` function to fit a logistic regression model. Specify your response variable (`death` in this case) and predictors.
+
+3.  The function should then return the fitted model for future use.
+
+#### Step 3: **Building the Prediction Function**
+
+1.  Now, define a second function, `predict_death_risk`, which takes the model and a dataframe of new data as its inputs.
+
+2.  Before making predictions, ensure that any categorical variables, such as `state`, are treated consistently as factors:
+
+3.  Use the `predict()` function to get the predicted probabilities (risk) from the logistic regression model.
+
+#### Step 4: Test the model
+
+What is the risk of a non-Malaysian male from Johor aged 45
+
+```{r}
+
+```
+
+### 

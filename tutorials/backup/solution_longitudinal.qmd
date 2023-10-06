@@ -1,0 +1,90 @@
+---
+title: "Time tRavelling: Introduction to Longitudinal models in R"
+author: "Vivek Jason"
+---
+
+### Tutorial 1: Exploring Correlation Structures in GEE
+
+Objective: In this exercise, we'll fit three different correlation structures to our data: unstructured, exchangeable, and AR1 (first-order autoregressive). By comparing their performance, you'll gain insight into how different correlation structures impact your GEE model results.
+
+**Step 1**: Fit the Unstructured Model: Start by fitting the model using an unstructured correlation structure as you've done before.
+
+**Step 2**: Fit the Exchangeable Model: Use an exchangeable correlation structure and refit the model.
+
+**Step 3**: Fit the AR1 Model: Now, fit the model using the first-order autoregressive structure.
+
+**Step 4**: Compare AIC Values: For each model, extract the AIC (Akaike Information Criterion) value, which serves as a measure of model goodness-of-fit.
+
+**Step 5**: Analyse: Compare the AIC values. Lower AIC values indicate better model fits. Based on this criterion, which correlation structure seems the most suitable for our data?
+
+Solution:
+
+```{r}
+
+# 1. Unstructured Model
+fit_gee_unstruct <- geeglm(dep ~ asthma + famsize + sed + race,
+                           data = df,
+                           id = df$sdmvstra,
+                           corstr = "unstructured")
+aic_unstruct <- AIC(fit_gee_unstruct)
+
+# 2. Exchangeable Model
+fit_gee_exchange <- geeglm(dep ~ asthma + famsize + sed + race,
+                           data = df,
+                           id = df$sdmvstra,
+                           corstr = "exchangeable")
+aic_exchange <- AIC(fit_gee_exchange)
+
+# 3. AR1 Model
+fit_gee_ar1 <- geeglm(dep ~ asthma + famsize + sed + race,
+                      data = df,
+                      id = df$sdmvstra,
+                      corstr = "AR1")
+aic_ar1 <- AIC(fit_gee_ar1)
+
+# 4. Compare AIC Values
+aic_values <- data.frame(Model = c("Unstructured", "Exchangeable", "AR1"),
+                         AIC = c(aic_unstruct, aic_exchange, aic_ar1))
+print(aic_values)
+```
+
+Now, based on the AIC values, which correlation structure would you consider the most appropriate for this dataset?
+
+### Tutorial 2: Exploring mixed models
+
+In the dataset we've been working with, let's explore how the relationship between `sedentary bebehavioursed)` and `depression (dep)` varies across different clusters (represented by the variable `sdmvstra`). To do this, fit four different mixed models:
+
+1.  Fixed intercept, fixed slope
+2.  Fixed intercept, random slope
+3.  Random intercept, fixed slope
+4.  Random intercept, random slope
+
+Step 1: Fixed Intercept, Fixed Slope: This is essentially a linear regression, as neither the intercept nor the slope is allowed to vary across clusters. Step 2: Fixed Intercept, Random Slope: The model has a constant intercept but allows the slope for `sed` to vary across clusters. Step 3: Random Intercept, Fixed Slope: The intercept can change across clusters, but the relationship (slope) between `sed` and `dep` remains constant. Step 4: Random Intercept, Random Slope: Both the intercept and the slope for `sed` can vary across clusters.
+
+```{r}
+# Load required library
+library(lme4)
+
+# 1. Fixed Intercept, Fixed Slope (Linear Regression)
+fit_fixed_intercept_fixed_slope <- lm(dep ~ sed, data = df)
+summary(fit_fixed_intercept_fixed_slope)
+
+# 2. Fixed Intercept, Random Slope
+fit_fixed_intercept_random_slope <- lmer(dep ~ sed + (0 + sed | sdmvstra), data = df, REML = FALSE)
+summary(fit_fixed_intercept_random_slope)
+
+# 3. Random Intercept, Fixed Slope
+fit_random_intercept_fixed_slope <- lmer(dep ~ sed + (1 | sdmvstra), data = df, REML = FALSE)
+summary(fit_random_intercept_fixed_slope)
+
+# 4. Random Intercept, Random Slope
+fit_random_intercept_random_slope <- lmer(dep ~ sed + (1 + sed | sdmvstra), data = df, REML = FALSE)
+summary(fit_random_intercept_random_slope)
+
+# Note:
+# - The term (0 + sed | sdmvstra) specifies a model with no intercept for the random effect.
+# - The term (1 | sdmvstra) specifies a model with a random intercept.
+# - The term (1 + sed | sdmvstra) allows both the intercept and the slope to vary across 'sdmvstra'.
+```
+
+By fitting and comparing these models, you can better understand the relationship between sedentary behavior and depression and how this relationship might differ across clusters or groups.

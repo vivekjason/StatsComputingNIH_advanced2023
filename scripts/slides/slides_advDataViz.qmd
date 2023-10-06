@@ -1,0 +1,94 @@
+---
+title: "Moving on with Data Visualisation"
+author: "Vivek Jason"
+format: revealjs
+editor: visual
+---
+
+## GIS Visualization: Mapping the World
+
+-   What is GIS? (Geographic Information Systems)
+-   Use Cases: Spatial analysis, urban planning, disaster response, etc.
+-   Bringing geographical context to data
+
+![](images/gis1.png){fig-align="right" width="1000"}
+
+------------------------------------------------------------------------
+
+## Mapping in R: Key Packages & Tools
+
+-   `sf`: Handling spatial data
+-   `tmap`: Thematic maps
+-   OpenStreetMap integration
+-   `spdep`: Spatial dependence: weights, models
+
+![](images/gis.png){fig-align="right" width="1000"}
+
+------------------------------------------------------------------------
+
+## Phylogenetic Trees: Tracing Lineages
+
+-   Understand evolutionary relationships
+-   Trace the source of outbreaks in epidemiology
+-   Analyze shared characteristics & descent
+
+![](images/mgheatmap-1.svg){fig-align="right"}
+
+------------------------------------------------------------------------
+
+## Drawing Evolution: R Packages for Trees
+
+-   `ape`: Analyses of Phylogenetics and Evolution
+-   `ggtree`: Extension of ggplot2 for phylogenetic trees
+-   `treeio`: Import/export tree data
+-   `ggnewscale`: Multiple scales in ggplot2
+
+![](images/phylo2.png){fig-align="right" width="1000"}
+
+------------------------------------------------------------------------
+
+## Interactive Plots: Engage with Your Data
+
+-   Why interactive plots? (Dynamic visualization, deeper data exploration)
+-   Used in web apps, dashboards, reports
+-   Enhanced user engagement & understanding
+
+![](images/plotly1.png){fig-align="right"}
+
+------------------------------------------------------------------------
+
+## Making Data Dance with `plotly`
+
+-   Create interactive web graphics
+-   Easily integrates with `ggplot2`
+-   Hover, zoom, select for better insights
+
+![](images/plotly2.png){fig-align="right" width="1000"}
+
+------------------------------------------------------------------------
+
+## Network Visualization: Seeing Connections
+
+-   Represent relationships between entities
+-   Use Cases: Social networks, organizational structures, web graphs
+-   Understand network topology & dynamics
+
+![](images/network1.png){fig-align="right"}
+
+------------------------------------------------------------------------
+
+## Web of Relations: R Packages for Networks
+
+-   `igraph`: Network analysis and visualization
+-   `visNetwork`: Interactive network visualizations
+-   Optional: `ggraph`: Graph layouts with ggplot2\\
+
+![](images/network2.png){fig-align="right"}
+
+------------------------------------------------------------------------
+
+## Expanding Visual Horizons with R
+
+-   The power of advanced visualization techniques
+-   Tools & packages to bring data to life
+-   Emphasize continuous learning & exploration

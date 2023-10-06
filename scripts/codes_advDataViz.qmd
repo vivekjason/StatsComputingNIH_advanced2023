@@ -1,0 +1,473 @@
+---
+title: "Moving on with Data Visualisation"
+author: "Vivek Jason"
+format: revealjs
+editor: visual
+---
+
+## Visualising GIS data in R
+
+Spatial data provides insights into disease outbreaks, helping answer:
+
+-   Where are the disease hotspots?
+
+-   How have these hotspots changed over time?
+
+-   Is the access to health facilities adequate?
+
+This section focuses on visualizing spatial data using `tmap` and `ggplot2`, managing data with the `sf` package, and introducing spatial statistics concepts using `spdep`.
+
+::: callout-note
+**Key terms**
+
+Geographic Information System (GIS): Framework for gathering, managing, and visualizing spatial data.
+
+GIS Software: - ArcGIS: Commercial GIS software by ESRI. - QGIS: Free open-source GIS software. - R as GIS: Command-line interface ensures reproducibility.
+
+Spatial Data: - Vector Data: Geometric features with points, lines, and polygons. - Raster Data: Matrix of cells, often used as aerial photos.
+
+Visualizing Spatial Data: - Shapefiles: Stores vector spatial data. - Coordinate Reference Systems (CRS): System used to locate features on Earth.
+:::
+
+### Getting started
+
+To map data, you need:
+
+1.  A dataset (either spatial or non-spatial).
+
+2.  Reference dataset if non-spatial.
+
+3.  An idea of how to present the information.
+
+**Types of Maps:**
+
+-   **Choropleth Map:** Colors represent regions based on attribute value.
+
+-   **Case Density Heatmap:** Shows 'hot spots' without defined regions.
+
+-   **Dot Density Map:** Uses dots to represent attribute values.
+
+-   **Proportional Symbols Map:** Uses symbols based on attribute value.
+
+### Data
+
+#### Load packages
+
+```{r}
+pacman::p_load(
+  rio,           # to import data
+  here,          # to locate files
+  tidyverse,     # to clean, handle, and plot the data (includes ggplot2 package)
+  sf,            # to manage spatial data using a Simple Feature format
+  tmap,          # to produce simple maps, works for both interactive and static maps
+  janitor,       # to clean column names
+  OpenStreetMap, # to add OSM basemap in ggplot map
+  spdep          # spatial statistics
+  )
+```
+
+#### Aggregated COVID-19 deaths in Malaysia
+
+Lets call in the data and run our standard cleaning
+
+```{r}
+c19_df <- read.csv("https://raw.githubusercontent.com/MoH-Malaysia/covid19-public/main/epidemic/linelist/linelist_deaths.csv")
+
+c19_df <- c19_df %>% 
+  mutate(across(where(is.character), na_if, ""),#look at all character columns and change "" empty cells to NA
+         across(contains("brand"), ~replace_na(na_if(.,"NA"),"unvaccinated")),#replace all NA cells in brand columns to unvaccinated
+         across(contains("date"), ~as.Date(., format = "%Y-%m-%d")),#change character to dates\ fromat
+  
+         duration_toDeath=as.numeric(date-date_positive)) #create a rabdom second continuous variable
+```
+
+Lets aggregate the deaths counts by state (lowest mapping denominator in our dataset)
+
+```{r}
+deaths <- c19_df %>% select(state) %>%
+  group_by(state) %>%
+  summarise (deaths=n()) %>% ungroup()
+```
+
+#### Administrative boundary shapefile
+
+Download the shapefile from [here](https://github.com/wmgeolab/geoBoundaries/raw/0af4921/releaseData/gbOpen/MYS/ADM1/geoBoundaries-MYS-ADM1-all.zip). Now we are going to do the following to save the Admin Level 2 shapefile in R:
+
+```{r}
+mys_map <- read_sf(here("data", "geoBoundaries-MYS-ADM1-all", 
+                        "geoBoundaries-MYS-ADM1.shp"))
+```
+
+Clean the state names so it is consistent with the C19 dataset
+
+```{r}
+# ADM1 level clean
+mys_map <- mys_map %>%
+  mutate(shapeName = case_when(shapeName=="Penang" ~ "Pulau Pinang",
+                               shapeName=="Kuala Lumpur" ~ "W.P. Kuala Lumpur",
+                               shapeName=="Labuan" ~ "W.P. Labuan",
+                               shapeName=="Putrajaya" ~ "W.P. Putrajaya",
+                               shapeName=="Malacca" ~ "Melaka"))
+```
+
+#### Health facilities in Malaysia
+
+Open street maps makes these data points open source and you can find them [here](https://export.hotosm.org/downloads/f43d74aa-8495-41c5-a8e8-15ee63894b88/hotosm_mys_health_facilities_points_shp.zip). Download and load it up and lets only keep hospitals, clinics and doctors.
+
+```{r}
+mys_health <- read_sf(here("data", "hotosm_mys_health_facilities_points_shp", 
+                        "hotosm_mys_health_facilities_points.shp")) %>%
+  janitor::clean_names() %>%
+  filter(amenity %in% c("hospital", "clinic", "doctors"))
+```
+
+### Plotting points
+
+Plot X-Y coordinates using the `mys_health` object.
+
+Use `tmap` for both static (`"plot"`) and interactive (`"view"`) mapping.
+
+```{r}
+# Set tmap mode to static
+tmap_mode("plot")
+
+# Plot points
+tm_shape(mys_health) + tm_dots(size=0.08, col='blue')
+```
+
+Plotting points alone is less informative. Adding administrative boundaries provides context:
+
+```{r}
+# Display administrative boundaries
+tm_shape(mys_map) +
+  tm_polygons(col = "#F7F7F7") +
+  tm_borders(col = "#000000", lwd = 2) +
+  tm_text("shapeName")
+
+# Zoom with bounding box
+tm_shape(mys_map, bbox = c(100.8, 2.8, 101.9, 3.7)) +
+  tm_polygons(col = "#F7F7F7") +
+  tm_borders(col = "#000000", lwd = 2) +
+  tm_text("shapeName")
+```
+
+Combine points and boundaries:
+
+```{r}
+# Display points on administrative boundaries
+tm_shape(mys_map, bbox = c(100.8, 2.8, 101.9, 3.7)) +
+  tm_polygons(col = "#F7F7F7") +
+  tm_borders(col = "#000000", lwd = 2) +
+  tm_text("shapeName")+
+tm_shape(mys_health) +
+  tm_dots(size=0.08, col='blue', alpha = 0.5) +
+  tm_layout(title = "Distribution of Heatlhcare facilities")
+```
+
+For more on R mapping options, see this blog [post](https://rstudio-pubs-static.s3.amazonaws.com/324400_69a673183ba449e9af4011b1eeb456b9.html).
+
+### Choropleths
+
+Lets first merge the aggregates and and maps
+
+```{r}
+mys_deaths <- left_join(mys_map, deaths,
+                        by=c("shapeName"="state")) 
+```
+
+Mapping the results
+
+```{r}
+# tmap mode
+tmap_mode("plot")               # view static map
+
+# plot polygons
+tm_shape(mys_deaths) + 
+        tm_polygons("deaths") +  # color by number of cases column
+        tm_text("shapeName")   # name display
+```
+
+### Turning it up with ggplot
+
+If you are already familiar with using **ggplot2**, you can use that package instead to create static maps of your data. The [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) function will draw different objects based on which features (points, lines, or polygons) are in your data. For example, you can use [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) in a [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html) using `sf` data with polygon geometry to create a choropleth map.
+
+If we want to use **ggplot2** to instead make a choropleth map of case counts, we can use similar syntax to call the [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) function:
+
+```{r}
+ggplot(data=mys_deaths) + 
+  geom_sf(aes(fill=deaths))    # set fill to vary by case count variable
+```
+
+We can then customize the appearance of our map using grammar that is consistent across **ggplot2**, for example:
+
+```{r}
+choro_deaths <- ggplot(data=mys_deaths) +                           
+  geom_sf(aes(fill=deaths)) +                        
+  scale_fill_continuous(high="#54278f", low="#f2f0f7") +    # change color gradient
+  theme_bw() +
+  labs(title = "Number of deaths, by administrative unit",   # set figure text
+       subtitle = "Admin level 1"
+  )
+choro_deaths
+```
+
+For R users who are comfortable working with **ggplot2**, [`geom_sf()`](https://ggplot2.tidyverse.org/reference/ggsf.html) offers a simple and direct implementation that is suitable for basic map visualizations. To learn more, read the [geom_sf() vignette](https://ggplot2.tidyverse.org/reference/ggsf.html) or the [ggplot2 book](https://ggplot2-book.org/maps.html).
+
+You can also check [this](https://www.epirhandbook.com/en/gis-basics.html#basemaps)out for using OSM maps to create different `basemaps()` and also [this](https://rstudio.github.io/leaflet/)for interactive maps using `leaflet()`
+
+## Visualising Phylogenetic data in R
+
+### Getting started
+
+Call in some important packages
+
+```{r}
+pacman::p_load(
+  rio,             # import/export
+  here,            # relative file paths
+  tidyverse,       # general data management and visualization
+  ape,             # to import and export phylogenetic files
+  ggtree,          # to visualize phylogenetic files
+  treeio,          # to visualize phylogenetic files
+  ggnewscale)      # to add additional layers of color schemes
+```
+
+### Data
+
+## Data Import
+
+The dataset can be obtained from the data. It is sample data from the [The Epidemiologist R Handbook](https://epirhandbook.com/en/index.html).
+
+### Phylogenetic Tree
+
+We'll be using the Newick file format (.nwk) for phylogenetic trees, which provides a standard computer-readable representation.
+
+**Important**: Phylogenetic tree files represent genetic distances, not the actual sequences.
+
+```{r}
+# Importing the Newick tree using the ape package
+tree <- ape::read.tree("../data/Shigella_tree.txt")
+
+# Inspecting the tree
+tree
+```
+
+### Additional Sample Data
+
+For more context, we also have a table with sample details like gender, origin, and antimicrobial resistance attributes.
+
+```{r}
+# Using the rio package to import the data
+sample_data <- rio::import("../data/sample_data_Shigella_tree.csv")
+```
+
+### Data Cleaning and Inspection
+
+To align `sample_data` with the phylogenetic tree, `Sample_ID` from `sample_data` should match `tip.labels` from `tree`.
+
+#### Check `tip.labels` from `tree`
+
+```{r}
+# Display first 6 tip.labels
+head(tree$tip.label)
+```
+
+#### Check `sample_data` Columns
+
+```{r}
+# Display column names
+colnames(sample_data)
+```
+
+#### Verify `Sample_ID` Formatting
+
+```{r}
+# Display first 6 Sample_IDs
+head(sample_data$Sample_ID)
+```
+
+#### Compare Samples between Tree and Data
+
+Check if samples match between `tree` and `sample_data`.
+
+```{r}
+# Samples in tree but not in data
+sample_data$Sample_ID[!tree$tip.label %in% sample_data$Sample_ID]
+```
+
+### Different Tree Layouts
+
+`ggtree` provides a variety of tree layout formats.
+
+```{r}
+# Display different tree layouts
+ggtree(tree) # linear tree
+ggtree(tree, branch.length = "none") # linear tree, aligned tips
+ggtree(tree, layout = "circular") # circular tree
+ggtree(tree, layout = "circular", branch.length = "none") # circular tree, aligned tips
+```
+
+#### Annotate Tree with Sample Data
+
+Using `%<+%` operator, we can integrate `sample_data` with the tree.
+
+```{r}
+# Display a circular tree with annotations
+ggtree(tree, layout = "circular", branch.length = 'none') %<+% sample_data +
+  aes(color = I(Belgium)) +
+  scale_color_manual(name = "Sample Origin", breaks = c("Yes", "No"),
+                     labels = c("NRCSS Belgium", "Other"),
+                     values = c("blue", "black"), na.value = "black") +
+  new_scale_color() +
+  geom_tippoint(mapping = aes(color = Continent), size = 1.5) +
+  scale_color_brewer(name = "Continent", palette = "Set1", na.value = "grey") +
+  geom_tiplab(color = 'black', offset = 1, size = 1, geom = "text", align = TRUE) +
+  ggtitle("Phylogenetic tree of Shigella sonnei") +
+  theme_minimal() + 
+  theme(legend.title = element_text(face = "bold", size = 12),
+        legend.text = element_text(face = "bold", size = 10),
+        plot.title = element_text(size = 12, face = "bold"),
+        legend.position = "bottom")
+```
+
+#### Save Tree Plot
+
+Save the plot using `ggsave()`.
+
+```{r}
+ggsave("results/example_tree_circular_1.png", width = 12, height = 14)
+```
+
+### Visualising networks in R
+
+In this tutorial, we will explore how to create a network visualization in R using the `igraph` and `visNetwork` packages. We'll simulate data representing infectious disease contact patterns and visualize the spread.
+
+#### Installing and Loading Required Packages
+
+```{r setup}
+pacman::p_load(
+  rio,             # import/export
+  here,            # relative file paths
+  tidyverse,       # general data management and visualization
+  igraph,            
+  visNetwork)   
+```
+
+#### Explaining the Data
+
+Our simulated dataset will represent individuals (`nodes`) and their contact patterns (`edges`). Each individual can be in contact with one or multiple other individuals, which represents a potential spread of an infectious disease.
+
+#### Simulating the Data
+
+For this demonstration, let's create a random graph with 20 nodes (individuals) and 40 edges (contacts).
+
+```{r simulate_data}
+nnodes <- 100
+nnedges <- 200
+
+nodes <- data.frame(id = 1:nnodes)
+edges <- data.frame(from = sample(1:nnodes, nnedges, replace = T),
+                    to = sample(1:nnodes, nnedges, replace = T))
+```
+
+Lets have a look at this sample data
+
+```{r}
+head(nodes)
+```
+
+and
+
+```{r}
+head(edges)
+```
+
+#### Creating a Network Visualization using visNetwork
+
+`visNetwork` works best with edge and node data frames. We'll extract these from our igraph object.
+
+```{r prepare_data}
+# with defaut layout
+visNetwork(nodes, edges, height = "500px") %>%
+  visIgraphLayout() %>%
+  visNodes(size = 10)
+```
+
+Circular?
+```{r}
+visNetwork(nodes, edges, height = "500px") %>%
+  visIgraphLayout(layout = "layout_in_circle") %>%
+  visNodes(size = 10) %>%
+  visOptions(highlightNearest = list(enabled = T, hover = T), 
+             nodesIdSelection = T)
+```
+
+Here, we've created an interactive network visualization. You can click on a node to highlight its direct connections. This visualization helps us understand potential hotspots in disease spread.
+
+### Making interactive plots in R
+
+Interactive data visualization enables audiences to explore and understand data dynamically. Common tools for this in R include `plotly` and `shiny`.
+
+We'll delve into converting a `ggplot()` visualization to an interactive one using `plotly`.
+
+#### Loading Necessary Packages
+
+We utilize the `p_load()` function from the `pacman` package for efficient package loading. It ensures the package is installed and then loads it.
+
+```{r}
+pacman::p_load(
+  rio,       # import/export
+  here,      # filepaths
+  lubridate, # date operations
+  plotly,    # interactive plots
+  scales,    # percentage calculations
+  tidyverse,  # data manipulation and visualization
+  ggplotly
+)
+```
+
+#### Make it come alive
+
+Remember the last choropleth we built- lets revisit it
+
+```{r}
+choro_deaths
+```
+
+Now lets bring it to life
+
+```{r}
+choro_deaths %>% plotly::ggplotly()
+```
+
+#### Reducing File Size
+
+For efficient rendering in HTML outputs, like this handbook, we aim to minimize the data size of our plots without compromising quality. This is achievable using `partial_bundle()` from `plotly`.
+
+```{r}
+intx_choro_deaths <- choro_deaths %>% 
+  plotly::ggplotly() %>%
+  plotly::partial_bundle()
+```
+
+#### Customizing Toolbar Buttons
+
+To declutter the plot interface, certain default buttons in plotly can be removed. We do this by utilizing the config() function from plotly.
+
+```{r}
+
+# Define buttons to be removed for a cleaner appearance
+plotly_buttons_remove <- list('zoom2d','pan2d','lasso2d', 'select2d','zoomIn2d',
+                              'zoomOut2d','autoScale2d','hoverClosestCartesian',
+                              'toggleSpikelines','hoverCompareCartesian')
+
+# Refine the plot configuration without the specified buttons
+intx_choro_deaths <- intx_choro_deaths %>%          
+  plotly::config(displaylogo = FALSE, modeBarButtonsToRemove = plotly_buttons_remove)
+```
+
+## Acknowledgements
+
+Material for this lecture was borrowed and adopted from
+
+-   [The Epidemiologist R Handbook](https://epirhandbook.com/en/index.html)

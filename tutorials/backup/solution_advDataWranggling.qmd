@@ -1,0 +1,161 @@
+---
+title: "Practical 1: Advanced Data Wranggling"
+author: "Vivek Jason"
+editor: visual
+---
+
+### **Task 1: Build a loop to run your univariate linear regression**
+
+#### **Step 1: Initialize and Prepare**
+
+1.  Before you start, understand the dataset's structure. Identify the dependent variable (in our case, 'age') and make a list of the independent variables you wish to test against it (like 'male', 'malaysian', etc.).
+
+2.  Create an empty data frame with columns to store each independent variable's name, beta coefficient, and p-value. (Tip: Use `data.frame()` to create a four column dataframe with empty cells)
+
+#### **Step 2: Setting up the Loop:**
+
+1.  Use a `for` loop to iterate over each independent variable in your list. For every loop iteration, you will perform a univariate linear regression using the dependent and independent variables.
+
+2.  Run the Regression: Inside the loop, use the linear modeling function (`lm()`) to conduct a regression. Extract the regression model summary to get the beta coefficient and p-value for the independent variable in that loop iteration.
+
+#### **Step 3: Store the Results**
+
+1.  Append the independent variable's name, beta coefficient, and p-value to the results data frame you initialized in step 1. Ensure the results are stored in the right order and format.
+
+2.  Save and Review: After the loop completes, save the results data frame to an output file, such as a CSV. Review the file to see the outcomes of each univariate regression, specifically looking at the relationship between 'age' and every other independent variable.
+
+```{r}
+# Given dataset: c19_df
+# Variables of interest for univariate regression with age
+variables <- c("male", "malaysian", "comorb", "brand2", "bid")
+
+# Initialize empty data frame to store results
+results <- data.frame(Variable = character(),
+                      Beta = numeric(),
+                      P_value = numeric(),
+                      stringsAsFactors = FALSE)
+
+# For loop to run the regressions
+for (var in variables) {
+  formula <- as.formula(paste("age ~", var))
+  model <- lm(formula, data = c19_df)
+  
+  # Extract beta coefficient and p-value for the variable of interest
+  beta <- coef(summary(model))[2, "Estimate"]
+  p_value <- coef(summary(model))[2, "Pr(>|t|)"]
+  
+  # Append to results dataframe
+  results <- rbind(results, c(var, beta, p_value))
+}
+
+# Name the columns for the results data frame
+colnames(results) <- c("Variable", "Beta", "P_value")
+
+# Write results to a table (e.g., using write.csv or other functions depending on the desired output format)
+write.csv(results, here("data", "univariate_results.csv"), row.names = FALSE)
+
+```
+
+### **Task 2: Reverse the sheet trick with `purrr` by state**
+
+#### Step 1: **Extracting unique State names**
+
+1.  To efficiently store each data frame as a separate Excel sheet, we need to extract and assign unique names to each data frame in the list.
+
+#### **Step 2: Choose a Save Path**
+
+1.  Decide where to save the consolidated Excel file. In this example, we're saving it under a "data" directory and naming the file "hospital_linelists.xlsx".
+
+#### **Step 3: Use `write_xlsx` to Save Data**
+
+1.  The `write_xlsx` function from the `writexl` package allows us to save our list of data frames as separate sheets in a single Excel file.
+
+```{r}
+#first extract the state names 
+c19_split <- c19_df %>% 
+     group_split(state)
+
+#rename the list
+names(c19_split) <- c19_split %>%   # Assign to names of listed data frames 
+     # Extract the names by doing the following to each data frame: 
+     map(.f = ~pull(.x, state)) %>%        # Pull out hospital column
+     map(.f = ~as.character(.x)) %>%          # Convert to character, just in case
+     map(.f = ~unique(.x))                    # Take the unique hospital name
+
+#extract to excel
+c19_split %>% 
+     writexl::write_xlsx(path = here("data", "state_linelists.xlsx"))
+
+```
+
+### **Task 3: Build a function that predicts risk of being an unvaccinated COVID-19 death based on age, gender, nationality, and state**
+
+#### **Step 1: Understand the Task**
+
+1.  Create a logistic regression model based on specific predictors.
+
+2.  Predict the risk (probability) of unvaccinated death for new data using the model.
+
+#### **Step 2: Building the Model Function**
+
+1.  Start by defining your function. We'll name it `build_logistic_model` which will take a dataframe as its input.
+
+2.  Inside the function, use the `glm()` function to fit a logistic regression model. Specify your response variable (`death` in this case) and predictors.
+
+3.  The function should then return the fitted model for future use.
+
+#### Step 3: **Building the Prediction Function**
+
+1.  Now, define a second function, `predict_death_risk`, which takes the model and a dataframe of new data as its inputs.
+
+2.  Before making predictions, ensure that any categorical variables, such as `state`, are treated consistently as factors:
+
+3.  Use the `predict()` function to get the predicted probabilities (risk) from the logistic regression model.
+
+#### Step 4: Test the model
+
+What is the risk of a non-Malaysian male from Johor aged 45
+
+```{r}
+build_logistic_model <- function(dataframe) {
+  
+  #create a variable called unvax_death
+  dataframe <- mutate(dataframe, unvax_death=ifelse(brand1=="unvaccinated", 1, 0))
+  
+  
+  # Fit the logistic regression model
+  model <- glm(unvax_death ~ age + malaysian + male + as.factor(state),
+               data = dataframe,
+               family = binomial(link = "logit"))
+  
+  return(model)
+}
+
+predict_death_risk <- function(model, newdata) {
+  # Ensure state is a factor in the newdata as well
+  newdata$state <- as.factor(newdata$state)
+  
+  # Predict probabilities using the logistic regression model
+  predicted_prob <- predict(model, newdata, type = "response")
+  
+  return(predicted_prob)
+}
+
+# Example Usage:
+
+# Build the model using your dataset (let's assume your dataset is named 'data')
+logistic_model <- build_logistic_model(c19_df)
+
+# Create a new data frame for which you'd like to predict the risk
+new_data <- data.frame(age = 45,
+                       malaysian = 0,
+                       male = 1,
+                       state = "Johor")
+
+# Predict the risk of death
+risk_of_death <- predict_death_risk(logistic_model, new_data)
+print(risk_of_death)
+
+```
+
+### 

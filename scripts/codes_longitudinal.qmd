@@ -1,0 +1,258 @@
+---
+title: "Time tRavelling: Introduction to Longitudinal models in R"
+author: "Vivek Jason"
+editor: visual
+---
+
+Diving into data, you'll often find it doesn't fit the mold of regular linear models. That's where multilevel modeling steps in. In this tutorial, we'll explore two powerful tools for this: 1. Generalized Estimating Equations (GEE) 2. Mixed Effects (ME, often known as hierarchical linear modeling or multilevel modeling or GLMM).
+
+### Quick Overview
+
+-   **Similarities**: Both tools help account for non-independence within clusters. Plus, they're rooted in linear regression, making them adaptable and potent for data relationships.
+-   **Differences**: GEE gives us average effects, while ME dives into effects within an average person. ME models can be a bit more intricate than GEE, sometimes taking longer to converge. However, always let your research questions guide your choice, not just computational speed.
+
+**Prepping Your Data**: Before diving into the models, ensure your data is in "long form" -- meaning each row signifies an observation. If dealing with repeated measures, you might initially find your data in "wide form", where each row represents an individual. Convert this so every time point for an individual is its own row. For our tutorial, our data is already in long form with community clusters.
+
+::: callout-note
+This is a primer. The world of multilevel modeling in R is vast, and while we touch upon its basics, there's much more out there to learn.
+:::
+
+Ready? Let's get modeling!
+
+### Load up
+
+Load some important packages
+
+```{r}
+pacman::p_load(
+  tidyverse,
+  rio,
+  here,
+  janitor,
+  skimr,
+  geepack,
+  gee,
+  lme4
+)
+```
+
+### Data
+
+We will utilise data from the NHANES dataset that should already be in the data folder of the course material. Lets load it up first:
+
+```{r}
+nhanes <- import(here("data", "nhanes.csv"))
+```
+
+Explore dataset
+
+```{r}
+skim(nhanes)
+```
+
+For the purposed of this tutorial we are interested in depression and its association with asthma, family size, sedentary behaviours, and the subjects race. Lets explore these first:
+
+1\) Family size and Depression
+
+```{r}
+nhanes %>% 
+  tabyl(famsize, dep2) %>%
+  adorn_percentages()%>%
+  adorn_pct_formatting(digits=1) %>%
+  adorn_ns("front") 
+```
+
+2\) Asthma and Depression
+
+```{r}
+nhanes %>% 
+  tabyl(asthma, dep2) %>%
+  adorn_percentages()%>%
+  adorn_pct_formatting(digits=1) %>%
+  adorn_ns("front") 
+```
+
+3\) Sedentary behaviour and Depression
+
+```{r}
+nhanes %>% 
+  tabyl(sed, dep2) %>%
+  adorn_percentages()%>%
+  adorn_pct_formatting(digits=1) %>%
+  adorn_ns("front") 
+```
+
+4\) Race and Depression
+
+```{r}
+nhanes %>% 
+  tabyl(race, dep2) %>%
+  adorn_percentages()%>%
+  adorn_pct_formatting(digits=1) %>%
+  adorn_ns("front") 
+```
+
+### **GEE Modeling Tutorial**
+
+Let's dive into GEE modeling. Two popular packages for this are `gee` and `geepack`. They make complex modeling seem easy, though they come with their quirks.
+
+**Here's What GEE Needs**:
+
+1\. **Outcome & Predictors**: Just like in regular linear regression and GLMs.
+
+2\. **Correlation Structure**: This helps the model understand the relationship pattern between time points or clusters.
+
+3\. **Cluster IDs**: Which data points belong to which cluster.
+
+4\. **Family**: Essentially, the type of distribution.
+
+For our tutorial's context, our data isn't based on time points but is clustered within communities. We'll use an unstructured correlation structure. It's flexible and fits our data just right.
+
+Let's jump in! For `geepack` to work, we need to filter out the missing values for the variables that will be in the model.
+
+```{r}
+df <- nhanes %>% select(dep, famsize, sed, race, asthma, sdmvstra) %>%
+  filter(complete.cases(dep, famsize, sed, race, asthma)) %>%
+  mutate(dep=as.numeric(dep))
+```
+
+Now, we'll build the model with both packages (just for demonstration). We predict depression with asthma, family size, minutes of sedentary behavior, and the subject's race.
+
+```{r}
+fit_gee <- gee(dep ~ asthma + famsize + sed + race,
+               data = df,
+               id = df$sdmvstra,
+               corstr = "unstructured")
+```
+
+What do the results look like?
+
+```{r}
+summary(fit_gee)$coef
+```
+
+The `gee` package doesn't directly provide p-values but provides the z-scores, which can be used to find the p-values. The `geepack` provides the p-values in the way you'll see in the `lm()` and `glm()` functions.
+
+```{r}
+fit_geeglm <- geeglm(dep ~ asthma + famsize + sed + race,
+                     data = df,
+                     id = df$sdmvstra,
+                     corstr = "unstructured")
+summary(fit_geeglm)
+```
+
+Lets exponentiate them so they look better
+
+```{r}
+fit_geeglm %>% tidy(exponentiate = TRUE, conf.int = TRUE)
+```
+
+These models are interpreted just as the regular GLM. It has adjusted for the correlations within the clusters and provides valid standard errors and p-values.
+
+### Time to get mixed up
+
+![](images/were-all-mixed.jpg)
+
+### Intro to Mixed Effects Tutorial
+
+Diving into mixed effects models? Great! They offer a unique blend of both fixed and random effects. Think of fixed effects as the usual factors we estimate, like in regular linear models. On the other hand, random effects don't focus on exact values but look to control or estimate variance.
+
+Let's clarify with a hands-on example. We'll predict depression based on asthma, family size, sedentary behavior minutes, and race. Using the `lme4` package, we'll also introduce a random intercept to account for variations across clusters. Let's get started!
+
+```{r}
+fit_me <- lmer(dep ~ asthma + famsize + sed + race + (1 | sdmvstra),
+               data = df,
+               REML = FALSE)
+summary(fit_me)
+```
+
+You'll see that there are no p-values provided here. This is because p-values are not well-defined in the ME framework. A good way to test it can be through the `anova()` function, comparing models. Let's compare a model with and without `asthma` to see if the model is significantly better with it in.
+
+```{r}
+fit_me1 <- lmer(dep ~ famsize + sed + race + (1 | sdmvstra),
+               data = df,
+               REML = FALSE)
+
+anova(fit_me, fit_me1)
+```
+
+This comparison strongly suggests that `asthma` is a significant predictor (χ2=50.5, p \< .001). We can do this with both fixed and random effects, as below
+
+```{r}
+fit_me2 <- lmer(dep ~ famsize + sed + race + (1 | sdmvstra),
+               data = df,
+               REML = TRUE)
+fit_me3 <- lmer(dep ~ famsize + sed + race + (1 + asthma | sdmvstra),
+               data = df,
+               REML = TRUE)
+anova(fit_me2, fit_me3, refit = FALSE)
+```
+
+Here, including random slopes for asthma appears to be significant (χ2=36.9, p \< .001).
+
+Linear mixed effects models converge pretty well. You'll see that the conclusions and estimates are very similar to that of the GEE. For generalized versions of ME, the convergence can be harder and more picky. As we'll see below, it complains about large eigenvalues and tells us to rescale some of the variables.
+
+```{r}
+fit_gme <- glmer(dep2 ~ asthma + famsize + sed + race + (1 | cluster),
+                 data = nhanes,
+                 family = "binomial")
+```
+
+After a quick check, we can see that `sed` is huge compared to the other variables. If we simply rescale it, using the `I()` function within the model formula, we can rescale it by 1,000. Here, that is all it needed to converge.
+
+```{r}
+fit_gme <- glmer(dep2 ~ asthma + famsize + I(sed/1000) + race + (1 | cluster),
+                 data = nhanes,
+                 family = "binomial")
+summary(fit_gme)
+```
+
+#### Diagnostics and Assumptions for Mixed Models:
+
+**1. Linearity:**\
+The relationship between the predictors and the response variable should be linear. We can check this by plotting the residuals against fitted values. A random scatter suggests that the assumption is met.
+
+```{r}
+# Extract residuals and fitted values
+residuals <- residuals(fit_me, type = "pearson")
+fitted_values <- fitted(fit_me)
+
+# Plot residuals vs. fitted values
+plot(fitted_values, residuals, main = "Residuals vs Fitted",
+     xlab = "Fitted values", ylab = "Residuals", pch = 16, col = "blue")
+abline(h = 0, col = "red", lwd = 2)
+```
+
+**2. Homoscedasticity of residuals:**\
+The residuals should have constant variance across levels of the independent variables. This can be checked similarly to linearity using a plot of residuals against fitted values.
+
+(Use the same plot as above. If the plot shows a funnel shape, it indicates potential heteroscedasticity.)
+
+**3. Normality of random effects and residuals:**\
+The residuals and random effects should be approximately normally distributed. We can check this using QQ-plots and histograms.
+
+```{r}
+# QQ-plot for residuals
+qqnorm(residuals)
+qqline(residuals, col = "red", lwd = 2)
+title("QQ-Plot for Residuals")
+
+# Histogram for residuals
+hist(residuals, breaks = 30, col = "skyblue", main = "Histogram of Residuals",
+     xlab = "Residuals")
+
+# For random effects:
+ranef_obj <- ranef(fit_me)$sdmvstra
+hist(ranef_obj[,1], breaks = 30, col = "lightgreen", main = "Histogram of Random Effects",
+     xlab = "Random Effects")
+```
+
+By analyzing the plots, we can deduce: - If the residuals vs. fitted values plot shows no patterns (like curves or funnels), then the linearity and homoscedasticity assumptions are likely met. - In the QQ-plot, if the points lie roughly on the red line, it indicates that the residuals are normally distributed. - The histograms provide a visual sense of the distribution. A bell-shaped curve indicates approximate normality.
+
+By incorporating these diagnostic checks into your presentation, participants will gain a clearer understanding of the assumptions underlying mixed models and the tools available in R to check those assumptions.
+
+### Acknowledgements
+
+Material for this lecture was borrowed and adopted from:
+
+-   [R for Researchers: An Introduction](https://tysonbarrett.com/Rstats/index.html)
