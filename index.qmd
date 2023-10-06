@@ -19,7 +19,7 @@ Have a look at the schedule below and download the necessary .qmd files for each
 ## Schedule and Materials
 
 | Date                   | Time                 | Topic                       |                                                                                                                                                                                                                                                          |
-|:----------------|:----------------|:----------------|----------------------|
+|:--------|:---------|:--------------|------------|
 | 10.10.2023 (Tuesday)   | 08.30 am - 09.00 am  | Registration                |                                                                                                                                                                                                                                                          |
 |                        | 9.00 am - 10.00 am   | Advanced data wranggling    | [Slides](https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_advDataWranggling.html)\| [Codes](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_advDataWranggling.qmd) |
 |                        | 10.00 am - 12.30 pm  | #Taking the Wheel 1         | [Tutorial](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_advDataWranggling.qmd)                                                                                                                            |

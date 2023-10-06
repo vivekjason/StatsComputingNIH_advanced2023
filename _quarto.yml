@@ -2,6 +2,10 @@ project:
   type: website
   render:
     - "index.qmd"
+    - "slides_advDataWranggling.qmd"
+    - "slides_advViz.qmd"
+    - "slides_survival.qmd"
+    - "slides_longitudinal.qmd"
   output-dir: docs
 
 website:
@@ -9,8 +13,6 @@ website:
   description: "Workshop website Statistical Computing in R (Intermediate to Advanced)"
   navbar:
     right:
-      - text: "Home"
-        file: index.qmd
       - icon: github
         href: https://github.com/vivekjason
       - icon: twitter

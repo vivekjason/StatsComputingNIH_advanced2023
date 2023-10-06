@@ -33,5 +33,264 @@
     "title": "Welcome to Statistical Computing in R!",
     "section": "",
     "text": "Vivek Jason\nJason is a gazetting Public Health Physician passionate about epidemiology, infectious diseases and data science. He spends his time between coding, parenting a toddler and pondering the fate of the universe.\n\n\n\n\n\nAng Swee Hung\nSwee Hung is a training Public Health Physician from the Institute for Clinical research that works heavily in the fields of non-communicable disease epidemiology. Renowned for her calmness under pressure- Swee Hung also enjoys the serenity of long drives and the excitement of travelling. Her next destination is Shanghai.\n\nYvonne Lim Mei Fong\nYvonne is a detail-oriented pharmacist at ICR with a Ph.D. in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality of her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit.\nThis course was developed and is maintained by Vivek Jason.\nThe following individuals have contributed to improving the course, or materials have been adapted from their courses: R for Applied Epidemiology and Public Health and R for Researchers: An Introduction.\nThe course materials are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know, and I will remove it."
+  },
+  {
+    "objectID": "slides_longitudinal.html",
+    "href": "slides_longitudinal.html",
+    "title": "Time tRavelling: Introduction to Longitudinal models in R",
+    "section": "",
+    "text": "Longitudinal studies\n\nRecord incident events\nAscertain exposure prospectively Identify time effects: cohort, period, age\nSummarize changes over time within individuals\nOffer attractive efficiency gains over cross-sectional studies\nHelp establish causal effect of exposure on outcome\n\n\n\n\n\nTime is of essence\nHelp establish causal effect of exposure on outcome\n\nCross-sectional study\n\nEgg → Chicken Chicken → Egg\n\nLongitudinal study\n\nBacterium → Dinosaur → Chicken\n\n\n\n\n\n\nChallenges\n\nAccount for incomplete participant follow-up\nDetermine causality when covariates vary over time\nChoose exposure lag when covariates vary over time\nRequire specialized methods that account for longitudinal correlation\n\n\n\n\nAnalytic approach\n\n\n\n\n\n\nCaution\n\n\n\nMust account for correlation due to repeated measurements over time\n\n\nFailure to account for correlation ⇒ incorrect standard estimates, resulting in incorrect confidence intervals and hypothesis tests\n\n\n\nAnalytic approaches\nApproaches: Include all observed data in a regression model for the mean response and account for longitudinal correlation\nGeneralized estimating equations (GEE): A marginal model for the mean response and a model for longitudinal correlation\n\nGeneralized linear mixed-effects models (GLMM): A conditional model for the mean response given subject-specific random effects, which induce a (possibly hierarchical) correlation structure\n\n\n\n\nGeneralised estimating equations\n\nContrast average outcome values across populations of individuals defined by covariate values, while accounting for correlation\nFocus on a generalized linear model with regression parameters β, which characterize the systemic variation in Y across covariates X\n\n\n\n\n\n\n\nLongitudinal correlation structure is a nuisance feature of the data (Liang and Zeger, 1986)\n\n\n\n\nGeneralised estimating equations\nMean model\n\nPrimary focus of the analysis\nAssumptions\n\nObservations are independent across subjects\nObservations may be correlated within subjects\n\nCharacterizes a marginal mean regression model\n\nµij does not condition on anything other than xij\n\n\n\n\n\nGeneralised estimating equations\nCovariance model\n\nLongitudinal correlation is a nuisance; secondary to mean model of interest\n\nAssume a form for variance that may depend on µij\nSelect a model for longitudinal correlation with parameters α\n\n\n\n\n\nCorrelation models\nCorrelation between any two observations on the same subject.\n\nIndependence: is assumed to be zero\n\nAlways appropriate with use of robust variance estimator (large n)\n\nExchangeable: is assumed to be constant\n\nMore appropriate for clustered data\n\nAuto-regressive: is assumed to depend on time or distance\n\nMore appropriate for equally-spaced longitudinal data\n\nUnstructured: is assumed to be distinct for each pair )\n\nOnly appropriate for short series (small m) on many subjects (large n)\n\n\n\n\n\nSemi-parametric\n\nSpecification of a mean model and correlation model does not identify a complete probability model for the outcomes\nThe [mean, correlation] model is semi-parametric because it only specifies the first two moments of the outcomes\nWe estimate β and generate valid statistical inference, while accounting for correlation by constructing an unbiased estimating function\nThis is also known as the sandwich, robust, or Huber-White variance estimator\n\nRequires sufficiently large sample size (n ≥ 40)\nRequires sufficiently large sample size relative to cluster size (n m)\n\n\n\n\n\nGEE in a Box\n\nPrimary focus of the analysis is a marginal mean regression model that corresponds to any GLM\nLongitudinal correlation is secondary to the mean model of interest and is treated as a nuisance feature of the data\nRequires selection of a ‘working’ correlation model\nLack of a likelihood function implies that likelihood ratio test statistics are unavailable; hypothesis testing with GEE uses Wald statistics\nWorking correlation model does not need to be correctly specified to obtain a consistent estimator for β or valid standard errors for β, but efficiency gains are possible if the correlation model is correct\n\n\n\n\nIssues\n\nAccommodates only one source of correlation: Longitudinal or cluster\nGEE requires that any missing data are missing completely at random\nIssues arise with time-dependent exposures and covariance weighting\n\n\n\n\nMixed-effects models\n\nContrast outcomes both within and between individuals\nAssume that each subject has a regression model characterized by subject-specific parameters; a combination of\n\nFixed-effects parameters common to all individuals in the population\nRandom-effects parameters unique to each individual subject\n\nAlthough covariates allow for differences across subjects, typically cannot measure all factors that give rise to subject-specific variation\nSubject-specific random effects induce a correlation structure (Laird and Ware, 1982)\n\n\n\n\nCharacterisation\n\n\n\n\nTypes of random effects\n\n\n\n\nTypes of random effects\n\n\n\n\nAssumptions\n\nValid inference from a linear mixed-effects model relies on\nMean model: As with any regression model for an average outcome, need to correctly specify the functional form of xijβ (here also zij bi )\n\nIncluded important covariates in the model\nCorrectly specified any transformations or interactions\n\nCovariance model: Correct covariance model (random-effects specification) is required for correct standard error estimates for β\nNormality: Normality of ϵij and bi is required for normal likelihood function to be the correct likelihood function for yij\nn sufficiently large for asymptotic inference to be valid\n\n\n\n\nGLMM in a Box\n\nMixed-effects models assume that each subject has a regression model characterized by subject-specific parameters; a combination of\n\nFixed-effects parameters common to all individuals in the population\nRandom-effects parameters unique to each individual subject\n\nEstimation and inference can focus both on average outcome levels and trends, and on heterogeneity across subjects in levels and trends\nSubject-specific random effects induce a correlation structure\nParametric likelihood approach permits use of likelihood ratio test, but requires several assumptions that must be verified in practice\n\n\n\n\nIssues\nInterpretation depends on outcomes and random-effects specification\nGLMM requires that any missing data are missing at random\nIssues arise with time-dependent exposures and covariance weighting\n\n\n\nGEE vs GLMM\n\nModel Purpose\n\nGEE: Focuses on the average population response. Good for estimating average effects in the population.\nGLMM: Describes both the average population response and subject-specific deviations. Useful for both population-level and subject-specific effects.\n\n\n\nCorrelation Handling\n\nGEE: Accounts for correlations between repeated measurements but doesn’t model them explicitly. Uses a working correlation matrix.\nGLMM: Models the correlation using random effects, considering the variance and covariance structure.\n\n\n\n\n\nGEE vs GLMM\n\nEstimation\n\nGEE: Uses quasi-likelihood estimation. Robust against incorrect specification of within-subject correlation.\nGLMM: Uses maximum likelihood (or its variants) for fixed and random effects.\n\n\n\nInterpretation\n\nGEE: Provides insights about average population effects.\nGLMM: Insights on both population average effects and individual variations.\n\n\n\n\n\nGEE vs GLMM\n\nAssumptions\n\nGEE: More flexible regarding response variable distribution. Fewer assumptions on random effects.\nGLMM: Assumes random effects follow a distribution, typically normal."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html",
+    "href": "slides_advDataWranggling.html",
+    "title": "Moving forward with Data Wrangling",
+    "section": "",
+    "text": "Imagine you wanted to run a univariate regression on a dataset with 25 column in…"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#why-the-need-to-advance",
+    "href": "slides_advDataWranggling.html#why-the-need-to-advance",
+    "title": "Moving forward with Data Wrangling",
+    "section": "",
+    "text": "Imagine you wanted to run a univariate regression on a dataset with 25 column in…"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#computation-is-a-superpower",
+    "href": "slides_advDataWranggling.html#computation-is-a-superpower",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Computation is a superpower",
+    "text": "Computation is a superpower\nRepeat analyses on subgroups such as countries, districts, or age groups. These are but a few of the many situations involving iteration. Using iterations you will:\n\nimplement repetitive tasks faster\nreduce the chance of error\nreduce code length"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#section",
+    "href": "slides_advDataWranggling.html#section",
+    "title": "Moving forward with Data Wrangling",
+    "section": "",
+    "text": "Advanced Data Wrangling Techniques in R\nWe will explore four pivotal techniques that can immensely enhance your data analysis efficiency and flexibility:\n\nLoops:\n\nEssential control structures in R, loops allow for repetitive execution of code blocks.\n\nApply Family:\n\nA powerful alternative to loops.\n\npurrr:\n\nPart of the renowned tidyverse, purrr enhances iterative tasks by introducing a functional programming paradigm.\n\nWriting Functions:\n\nWriting custom functions allows for encapsulated, reusable logic."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#loopy-loops",
+    "href": "slides_advDataWranggling.html#loopy-loops",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Loopy loops",
+    "text": "Loopy loops\n\nWhat are loops?\n\nControl structures that allow code to be executed multiple times.\nCan iterate over sequences, vectors, or other data structures."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#types-of-loops-in-r",
+    "href": "slides_advDataWranggling.html#types-of-loops-in-r",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Types of loops in R:",
+    "text": "Types of loops in R:"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#loops-in-the-real-world",
+    "href": "slides_advDataWranggling.html#loops-in-the-real-world",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Loops in the Real World",
+    "text": "Loops in the Real World\n\nData Transformation\nSimulations\nAutomation"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#why-not-loops",
+    "href": "slides_advDataWranggling.html#why-not-loops",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Why Not Loops?",
+    "text": "Why Not Loops?\nConsidering Alternatives to Traditional Loops\n\nPitfalls of Loops:\n\nCan be slower for large datasets.\nOften verbose, leading to longer code.\n\nEnter the Apply Family:\n\nDesigned for performing operations on lists, matrices, and data frames.\nOften faster and more concise than equivalent loops.\n\n\n\n\n\n\n\n\nTip\n\n\n\nAlways consider whether a loop is the best tool for the job or if a vectorized approach can be utilized."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#meet-the-family",
+    "href": "slides_advDataWranggling.html#meet-the-family",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Meet the Family",
+    "text": "Meet the Family\n\nlapply():\n\nReturns a list.\nCommonly used for list or vector operations.\n\nsapply():\n\nSimplifies results from lapply() to the most basic structure possible (e.g., vector, matrix).\nGreat for quick operations without needing to deal with lists.\n\nmapply():\n\nMultivariate version of lapply().\nApply a function to the 1st elements of each argument, the 2nd elements, and so on.\n\n\n\n\n\n\n\n\nImportant\n\n\n\nChoosing the right function depends on the structure of your data and the desired output."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#the-power-of-purrr",
+    "href": "slides_advDataWranggling.html#the-power-of-purrr",
+    "title": "Moving forward with Data Wrangling",
+    "section": "The Power of purrr",
+    "text": "The Power of purrr\n\nWhat is purrr?\n\nAn integral part of the tidyverse suite.\nDesigned for functional programming and iterative tasks in R."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#advantages-over-base-r-loops",
+    "href": "slides_advDataWranggling.html#advantages-over-base-r-loops",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Advantages over Base R Loops:",
+    "text": "Advantages over Base R Loops:\n\nConsistency: Offers a consistent set of tools that align well with the tidyverse ecosystem.\nReadability: With functions like map(), code becomes more intuitive and less cluttered.\nFlexibility: Able to handle various output types (map_dbl(), map_int(), map_df(), etc.) without complex restructuring."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#complex-data-simplified-with-purrr",
+    "href": "slides_advDataWranggling.html#complex-data-simplified-with-purrr",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Complex Data Simplified with purrr",
+    "text": "Complex Data Simplified with purrr\n\nWhat are List-columns & Nested Data?\n\nData frames where each cell can contain more than one value or another data frame.\nArise frequently in advanced data wrangling tasks, especially when data is hierarchical or grouped.\n\npurrr’s Approach:\n\nMakes handling and iterating over list-columns more straightforward.\nFunctions like map() can be combined with mutate() from dplyr for powerful transformations.\nSimplify operations like extracting, modifying, or summarizing nested data without cumbersome loops."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#embracing-a-new-paradigm",
+    "href": "slides_advDataWranggling.html#embracing-a-new-paradigm",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Embracing a New Paradigm",
+    "text": "Embracing a New Paradigm\n\nUnderstanding Functional Programming:\n\nA style of programming where functions are first-class citizens – they can be passed as arguments, returned, or stored.\nFocuses on immutability, reducing side effects and making code more predictable.\n\nBenefits in Data Analysis:\n\nModularity: Write code in self-contained, reusable chunks.\nClarity: Achieve more with fewer lines of code, enhancing readability.\nSafety: Less risk of unintended side effects, making debugging and validation more straightforward."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#custom-functions-in-r",
+    "href": "slides_advDataWranggling.html#custom-functions-in-r",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Custom Functions in R",
+    "text": "Custom Functions in R\n\nWhy Functions?\n\nEncapsulate logic for reuse.\nEnhance code readability and maintainability.\n\nBasic Structure:\n\nfunction_name &lt;- function(arguments) {\n  # Code to execute\n  return(result)\n}"
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#understanding-function-components",
+    "href": "slides_advDataWranggling.html#understanding-function-components",
+    "title": "Moving forward with Data Wrangling",
+    "section": "Understanding Function Components",
+    "text": "Understanding Function Components\n\nArguments: Inputs the function requires to run.\nBody: The core code that gets executed.\nReturn Values: The output produced by the function.\n\n\n\n\n\n\n\nTip\n\n\n\n\nKeep functions focused on a single task.\nUse meaningful argument and function names.\nHandle potential errors or exceptions within the function."
+  },
+  {
+    "objectID": "slides_advDataWranggling.html#so-then..-lets-get-started-on-some-code",
+    "href": "slides_advDataWranggling.html#so-then..-lets-get-started-on-some-code",
+    "title": "Moving forward with Data Wrangling",
+    "section": "So then.. lets get started on some code",
+    "text": "So then.. lets get started on some code"
+  },
+  {
+    "objectID": "slides_survival.html",
+    "href": "slides_survival.html",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "",
+    "text": "Collection of statistical procedures.\nAnswer questions related to survival past a time or event.\nData form: time until event occurs.\nConvention: time (survival time), event (failure)."
+  },
+  {
+    "objectID": "slides_survival.html#what-is-survival-analysis",
+    "href": "slides_survival.html#what-is-survival-analysis",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "",
+    "text": "Collection of statistical procedures.\nAnswer questions related to survival past a time or event.\nData form: time until event occurs.\nConvention: time (survival time), event (failure)."
+  },
+  {
+    "objectID": "slides_survival.html#examples-of-survival-analysis",
+    "href": "slides_survival.html#examples-of-survival-analysis",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Examples of Survival Analysis",
+    "text": "Examples of Survival Analysis\n\nClinical trial: Test medicine effects, time until disease.\nFinance: Credit model, time to client default.\nEconomics: Unemployment duration.\nIndustry engineering: Lifetime of products."
+  },
+  {
+    "objectID": "slides_survival.html#types-of-survival-data",
+    "href": "slides_survival.html#types-of-survival-data",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Types of Survival Data",
+    "text": "Types of Survival Data\n\nComplete data\nTruncation: Observations based on events.\nCensoring: Time of event is imprecise.\nThree types: right, left, and interval censoring."
+  },
+  {
+    "objectID": "slides_survival.html#more-on-censoring",
+    "href": "slides_survival.html#more-on-censoring",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "More on Censoring",
+    "text": "More on Censoring\n\nRight censoring: Most common. True time &gt; Observed time.\nLeft censoring: True time &lt; Observed time.\nInterval censoring: Between two observed times."
+  },
+  {
+    "objectID": "slides_survival.html#a-note-on-right-censoring",
+    "href": "slides_survival.html#a-note-on-right-censoring",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "A note on right-censoring",
+    "text": "A note on right-censoring\nTime to the occurrence of a given event (e.g. death) measured from a well-defined starting point (time origin)\n\ne.g. Time from study enrollment to death in a cancer clinical trial\n\nThe full time to death is not observed for some subjects\n\nWithdrawal, lost to follow-up, alive at the end of study\nAll we know is the survival time is larger than the censoring time (e.g. time from study enrollment to drop out)"
+  },
+  {
+    "objectID": "slides_survival.html#goals-of-survival-analysis",
+    "href": "slides_survival.html#goals-of-survival-analysis",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Goals of Survival Analysis",
+    "text": "Goals of Survival Analysis\n\nEstimate & interpret survival and hazard functions.\nCompare survival/hazard functions.\nAssess relationship of variables to survival time."
+  },
+  {
+    "objectID": "slides_survival.html#data-layout",
+    "href": "slides_survival.html#data-layout",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Data Layout",
+    "text": "Data Layout\n\nRepresented by pair (t, d).\nt: time, d: censoring indicator.\nd=1 if failure, d=0 if censored.\nx: covariates of interest."
+  },
+  {
+    "objectID": "slides_survival.html#survival-function",
+    "href": "slides_survival.html#survival-function",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Survival Function",
+    "text": "Survival Function\n\nProportion of population still without event by time t.\nGraphed as decreasing smooth curve.\nS(t) = Pr(T &gt; t)\n\n\n\n\n\n## Estimating Survival Curves\n\n\n- Kaplan-Meier (KM) estimator used.\n\n\n- Step function, not smooth.\n\n\n- Curve jumps at observed failure times."
+  },
+  {
+    "objectID": "slides_survival.html#hazard-function",
+    "href": "slides_survival.html#hazard-function",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Hazard Function",
+    "text": "Hazard Function\n\nAlternative names: Incidence rate, Instantaneous risk.\nInstantaneous potential for event to occur.\nValues range between zero and infinity."
+  },
+  {
+    "objectID": "slides_survival.html#relative-risks",
+    "href": "slides_survival.html#relative-risks",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Relative Risks",
+    "text": "Relative Risks\n\nKnown as Risk ratio, Hazard ratio (RR/HR).\nMeasure strength of effect on survival.\nDefined via hazard rates of treatment vs control groups."
+  },
+  {
+    "objectID": "slides_survival.html#testing-survival-curves-differences",
+    "href": "slides_survival.html#testing-survival-curves-differences",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Testing Survival Curves Differences",
+    "text": "Testing Survival Curves Differences\n\nLog-rank test for two survival curves.\nStratified log-rank test for categorical variables."
+  },
+  {
+    "objectID": "slides_survival.html#log-rank-test",
+    "href": "slides_survival.html#log-rank-test",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Log-Rank Test",
+    "text": "Log-Rank Test\n\nTest equality of two survival curves.\nStatistic based on series of tables.\nTest at infinity many time points."
+  },
+  {
+    "objectID": "slides_survival.html#cox-regression",
+    "href": "slides_survival.html#cox-regression",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Cox regression",
+    "text": "Cox regression"
+  },
+  {
+    "objectID": "slides_survival.html#cox-regression-1",
+    "href": "slides_survival.html#cox-regression-1",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Cox regression",
+    "text": "Cox regression"
+  },
+  {
+    "objectID": "slides_survival.html#cox-proportional-hazards-model",
+    "href": "slides_survival.html#cox-proportional-hazards-model",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Cox Proportional Hazards Model",
+    "text": "Cox Proportional Hazards Model\n\nModel setup\nThe Cox PH model specifies the hazard for individual i.\nNote: There is no intercept term in the Cox model.\nModel assumption\nProportional hazards (PH) assumption.\nPH assumption requires a constant over time\nModel interpretation"
+  },
+  {
+    "objectID": "slides_survival.html#checking-assumptions",
+    "href": "slides_survival.html#checking-assumptions",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Checking Assumptions",
+    "text": "Checking Assumptions\n\nDeviance residual plot\nSchoenfeld resiual plot\nto check proportional hazards assumption\nrandomness of residuals == proportionality"
+  },
+  {
+    "objectID": "slides_survival.html#when-ph-assumption-is-violated",
+    "href": "slides_survival.html#when-ph-assumption-is-violated",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "When PH Assumption is Violated",
+    "text": "When PH Assumption is Violated\n\nStratified Cox model\nTime-varying coefficients\nAccelerated failure-time models (AFT)\nParametric survival analysis\nMultilevel survival models etc…"
+  },
+  {
+    "objectID": "slides_survival.html#implementing-survival-analysis-in-r",
+    "href": "slides_survival.html#implementing-survival-analysis-in-r",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Implementing survival analysis in R",
+    "text": "Implementing survival analysis in R"
+  },
+  {
+    "objectID": "slides_survival.html#conclusion",
+    "href": "slides_survival.html#conclusion",
+    "title": "SuRviving: A Dive into Survival Analysis",
+    "section": "Conclusion",
+    "text": "Conclusion\n\nSurvival Analysis is crucial in various fields.\nVarious methods available for estimation & testing.\nR offers comprehensive tools for survival analysis."
   }
 ]

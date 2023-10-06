@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Vivek Jason">
 
-<title>Statistical Computing in R 2023 -</title>
+<title>Statistical Computing in R 2023 - SuRviving: A Dive into Survival Analysis</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -112,155 +113,258 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#welcome-to-statistical-computing-in-r" id="toc-welcome-to-statistical-computing-in-r" class="nav-link active" data-scroll-target="#welcome-to-statistical-computing-in-r"><strong>Welcome to Statistical Computing in R!</strong></a>
-  <ul class="collapse">
-  <li><a href="#what-is-this-workshop" id="toc-what-is-this-workshop" class="nav-link" data-scroll-target="#what-is-this-workshop"><strong>What is this workshop?</strong></a></li>
-  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started"><strong>Getting started</strong></a></li>
-  <li><a href="#schedule-and-materials" id="toc-schedule-and-materials" class="nav-link" data-scroll-target="#schedule-and-materials">Schedule and Materials</a></li>
-  <li><a href="#speakers" id="toc-speakers" class="nav-link" data-scroll-target="#speakers">Speakers</a></li>
-  </ul></li>
+  <li><a href="#what-is-survival-analysis" id="toc-what-is-survival-analysis" class="nav-link active" data-scroll-target="#what-is-survival-analysis">What is Survival Analysis?</a></li>
+  <li><a href="#examples-of-survival-analysis" id="toc-examples-of-survival-analysis" class="nav-link" data-scroll-target="#examples-of-survival-analysis">Examples of Survival Analysis</a></li>
+  <li><a href="#types-of-survival-data" id="toc-types-of-survival-data" class="nav-link" data-scroll-target="#types-of-survival-data">Types of Survival Data</a></li>
+  <li><a href="#more-on-censoring" id="toc-more-on-censoring" class="nav-link" data-scroll-target="#more-on-censoring">More on Censoring</a></li>
+  <li><a href="#a-note-on-right-censoring" id="toc-a-note-on-right-censoring" class="nav-link" data-scroll-target="#a-note-on-right-censoring">A note on right-censoring</a></li>
+  <li><a href="#goals-of-survival-analysis" id="toc-goals-of-survival-analysis" class="nav-link" data-scroll-target="#goals-of-survival-analysis">Goals of Survival Analysis</a></li>
+  <li><a href="#data-layout" id="toc-data-layout" class="nav-link" data-scroll-target="#data-layout">Data Layout</a></li>
+  <li><a href="#survival-function" id="toc-survival-function" class="nav-link" data-scroll-target="#survival-function">Survival Function</a></li>
+  <li><a href="#hazard-function" id="toc-hazard-function" class="nav-link" data-scroll-target="#hazard-function">Hazard Function</a></li>
+  <li><a href="#relative-risks" id="toc-relative-risks" class="nav-link" data-scroll-target="#relative-risks">Relative Risks</a></li>
+  <li><a href="#testing-survival-curves-differences" id="toc-testing-survival-curves-differences" class="nav-link" data-scroll-target="#testing-survival-curves-differences">Testing Survival Curves Differences</a></li>
+  <li><a href="#log-rank-test" id="toc-log-rank-test" class="nav-link" data-scroll-target="#log-rank-test">Log-Rank Test</a></li>
+  <li><a href="#cox-regression" id="toc-cox-regression" class="nav-link" data-scroll-target="#cox-regression">Cox regression</a></li>
+  <li><a href="#cox-regression-1" id="toc-cox-regression-1" class="nav-link" data-scroll-target="#cox-regression-1">Cox regression</a></li>
+  <li><a href="#cox-proportional-hazards-model" id="toc-cox-proportional-hazards-model" class="nav-link" data-scroll-target="#cox-proportional-hazards-model">Cox Proportional Hazards Model</a></li>
+  <li><a href="#checking-assumptions" id="toc-checking-assumptions" class="nav-link" data-scroll-target="#checking-assumptions">Checking Assumptions</a></li>
+  <li><a href="#when-ph-assumption-is-violated" id="toc-when-ph-assumption-is-violated" class="nav-link" data-scroll-target="#when-ph-assumption-is-violated">When PH Assumption is Violated</a></li>
+  <li><a href="#implementing-survival-analysis-in-r" id="toc-implementing-survival-analysis-in-r" class="nav-link" data-scroll-target="#implementing-survival-analysis-in-r">Implementing survival analysis in R</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
-</nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="slides_survival.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">SuRviving: A Dive into Survival Analysis</h1>
+</div>
 
 
-<section id="welcome-to-statistical-computing-in-r" class="level1">
-<h1><strong>Welcome to Statistical Computing in R!</strong></h1>
-<p>Welcome to the <strong>Statistical Computing in R! for Intermediates to Advanced</strong> organised by the Sector for Biostatistics and Data Repository, National Institutes of Health, Malaysia</p>
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Vivek Jason </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="what-is-survival-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-survival-analysis">What is Survival Analysis?</h2>
+<ul>
+<li>Collection of statistical procedures.</li>
+<li>Answer questions related to survival past a time or event.</li>
+<li>Data form: time until event occurs.</li>
+<li>Convention: <code>time</code> (survival time), <code>event</code> (failure).</li>
+</ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="images/promo.png" class="img-fluid figure-img"></p>
+<p><img src="images/survival_curve.png" class="img-fluid figure-img" width="2000"></p>
 </figure>
 </div>
-<section id="what-is-this-workshop" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-this-workshop"><strong>What is this workshop?</strong></h2>
-<p>This workshop advances the groundwork for addressing key practical aspects of programming and other essential computer skills needed for both research and implementation of statistical methods. The course offers advanced data wrangling and data visualisation, as well as an exploration of both survival analysis and survey-based analysis in R.</p>
+<hr>
 </section>
-<section id="getting-started" class="level2">
-<h2 class="anchored" data-anchor-id="getting-started"><strong>Getting started</strong></h2>
-<p>Have a look at the schedule below and download the necessary .qmd files for each session. Slides are also provided. While I have included <a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/tree/master/tutorials/backup">solutions</a>- it would be way more beneficial to attempt these yourself first. Let’s try to maximise learning in the next two days. Additionally, please download the data files for the workshop <a href="https://www.dropbox.com/sh/xy51t0b0qigerxi/AADkR4GtAw_sbs8DBlLF13xMa?dl=1">here</a>.</p>
+<section id="examples-of-survival-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="examples-of-survival-analysis">Examples of Survival Analysis</h2>
+<ul>
+<li>Clinical trial: Test medicine effects, time until disease.</li>
+<li>Finance: Credit model, time to client default.</li>
+<li>Economics: Unemployment duration.</li>
+<li>Industry engineering: Lifetime of products.</li>
+</ul>
+<hr>
 </section>
-<section id="schedule-and-materials" class="level2">
-<h2 class="anchored" data-anchor-id="schedule-and-materials">Schedule and Materials</h2>
+<section id="types-of-survival-data" class="level2">
+<h2 class="anchored" data-anchor-id="types-of-survival-data">Types of Survival Data</h2>
+<ul>
+<li>Complete data</li>
+<li>Truncation: Observations based on events.</li>
+<li>Censoring: Time of event is imprecise.</li>
+<li>Three types: right, left, and interval censoring.</li>
+</ul>
+<hr>
+</section>
+<section id="more-on-censoring" class="level2">
+<h2 class="anchored" data-anchor-id="more-on-censoring">More on Censoring</h2>
+<ul>
+<li>Right censoring: Most common. True time &gt; Observed time.</li>
+<li>Left censoring: True time &lt; Observed time.</li>
+<li>Interval censoring: Between two observed times.</li>
+</ul>
+<p><img src="images/censoring.jpg" class="img-fluid" width="2000"></p>
+<hr>
+</section>
+<section id="a-note-on-right-censoring" class="level2">
+<h2 class="anchored" data-anchor-id="a-note-on-right-censoring">A note on right-censoring</h2>
+<p>Time to the occurrence of a given event (e.g.&nbsp;death) measured from a well-defined starting point (time origin)</p>
+<ul>
+<li>e.g.&nbsp;Time from study enrollment to death in a cancer clinical trial</li>
+</ul>
+<p>The full time to death is not observed for some subjects</p>
+<ul>
+<li><p>Withdrawal, lost to follow-up, alive at the end of study</p></li>
+<li><p>All we know is the survival time is larger than the censoring time (e.g.&nbsp;time from study enrollment to drop out)</p></li>
+</ul>
+<hr>
+</section>
+<section id="goals-of-survival-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="goals-of-survival-analysis">Goals of Survival Analysis</h2>
+<ol type="1">
+<li><p>Estimate &amp; interpret survival and hazard functions.</p></li>
+<li><p>Compare survival/hazard functions.</p></li>
+<li><p>Assess relationship of variables to survival time.</p></li>
+</ol>
+<hr>
+</section>
+<section id="data-layout" class="level2">
+<h2 class="anchored" data-anchor-id="data-layout">Data Layout</h2>
+<ul>
+<li>Represented by pair <code>(t, d)</code>.</li>
+<li><code>t</code>: time, <code>d</code>: censoring indicator.</li>
+<li><code>d=1</code> if failure, <code>d=0</code> if censored.</li>
+<li><code>x</code>: covariates of interest.</li>
+</ul>
+<hr>
+</section>
+<section id="survival-function" class="level2">
+<h2 class="anchored" data-anchor-id="survival-function">Survival Function</h2>
+<ul>
+<li><p>Proportion of population still without event by time t.</p></li>
+<li><p>Graphed as decreasing smooth curve.</p></li>
+<li><p>S(t) = Pr(T &gt; t)</p>
+<p><img src="images/survival_curve_concept.png" class="img-fluid"></p></li>
+</ul>
 <table class="table">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Date</th>
-<th style="text-align: left;">Time</th>
-<th style="text-align: left;">Topic</th>
-<th></th>
-</tr>
-</thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">10.10.2023 (Tuesday)</td>
-<td style="text-align: left;">08.30 am - 09.00 am</td>
-<td style="text-align: left;">Registration</td>
-<td></td>
+<td style="text-align: left;">## Estimating Survival Curves</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">9.00 am - 10.00 am</td>
-<td style="text-align: left;">Advanced data wranggling</td>
-<td><a href="https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_advDataWranggling.html">Slides</a>| <a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_advDataWranggling.qmd">Codes</a></td>
+<td style="text-align: left;">- Kaplan-Meier (KM) estimator used.</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">10.00 am - 12.30 pm</td>
-<td style="text-align: left;">#Taking the Wheel 1</td>
-<td><a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_advDataWranggling.qmd">Tutorial</a></td>
+<td style="text-align: left;">- Step function, not smooth.</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">12.30 pm - 02.00 pm</td>
-<td style="text-align: left;">Break</td>
-<td></td>
+<td style="text-align: left;">- Curve jumps at observed failure times.</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">02.00 pm - 04.30 pm</td>
-<td style="text-align: left;">Advanced data visualisation</td>
-<td><a href="https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_advDataViz.html">Slides</a>| <a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_advDataViz.qmd">Codes</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">03.00 pm - 04.30 pm</td>
-<td style="text-align: left;">#Taking the Wheel 2</td>
-<td><a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_advDataViz.qmd">Tutorial</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">11.10.2023 (Wednesday)</td>
-<td style="text-align: left;">08.00 am – 08.30 am</td>
-<td style="text-align: left;">Registration</td>
-<td></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">09.00 am - 10.00 am</td>
-<td style="text-align: left;">Survival analysis</td>
-<td><a href="https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_survival.html">Slides</a> | <a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_survival.qmd">Codes</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">10.00 am - 12.30 pm</td>
-<td style="text-align: left;">#Taking the Wheel 3</td>
-<td><a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_survival.qmd">Tutorial</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">12.30 pm - 02.00 pm</td>
-<td style="text-align: left;">Break</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">02.00 pm - 03.00 pm</td>
-<td style="text-align: left;">GEE and GLMM</td>
-<td><a href="https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_longitudinal.html">Slides</a> | <a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_longitudinal.qmd">Codes</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">03.00 pm - 04.30 pm</td>
-<td style="text-align: left;">#Taking the Wheel 4</td>
-<td><a href="https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_longitudinal.qmd">Tutorial</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;"></td>
-<td style="text-align: left;">04.30 pm - 05.00 pm</td>
-<td style="text-align: left;">Q&amp;A</td>
-<td></td>
+<td style="text-align: left;"><img src="images/survival_curve2.png" class="img-fluid"></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="speakers" class="level2">
-<h2 class="anchored" data-anchor-id="speakers">Speakers</h2>
-<div class="quarto-figure quarto-figure-left">
-<figure class="figure">
-<p><img src="images/1688354405314.png" class="img-fluid figure-img" style="width:2in"></p>
-</figure>
-</div>
-<p><strong>Vivek Jason</strong></p>
-<p>Jason is a gazetting Public Health Physician passionate about epidemiology, infectious diseases and data science. He spends his time between coding, parenting a toddler and pondering the fate of the universe.</p>
-<div class="quarto-figure quarto-figure-left">
-<figure class="figure">
-<p><img src="images/1688352291610.png" class="img-fluid figure-img" style="width:2in"></p>
-</figure>
-</div>
-<p><strong>Ang Swee Hung</strong></p>
-<p>Swee Hung is a training Public Health Physician from the Institute for Clinical research that works heavily in the fields of non-communicable disease epidemiology. Renowned for her calmness under pressure- Swee Hung also enjoys the serenity of long drives and the excitement of travelling. Her next destination is Shanghai.</p>
-<p><img src="images/yvonne.jpeg" class="img-fluid" style="width:2in"></p>
-<p><strong>Yvonne Lim Mei Fong</strong></p>
-<p>Yvonne is a detail-oriented pharmacist at ICR with a Ph.D.&nbsp;in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality of her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit.</p>
-<p>This course was developed and is maintained by <a href="https://github.com/vivekjason">Vivek Jason</a>.</p>
-<p>The following individuals have contributed to improving the course, or materials have been adapted from their courses: <a href="https://epirhandbook.com/en/">R for Applied Epidemiology and Public Health</a> and <a href="https://tysonbarrett.com/Rstats/index.html">R for Researchers: An Introduction</a>.</p>
-<p>The course materials are licensed under the <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>. Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know, and I will remove it.</p>
-
-
+<section id="hazard-function" class="level2">
+<h2 class="anchored" data-anchor-id="hazard-function">Hazard Function</h2>
+<ul>
+<li><p>Alternative names: Incidence rate, Instantaneous risk.</p></li>
+<li><p>Instantaneous potential for event to occur.</p></li>
+<li><p>Values range between zero and infinity.<img src="images/survival_function.png" class="img-fluid"></p></li>
+</ul>
+<hr>
 </section>
+<section id="relative-risks" class="level2">
+<h2 class="anchored" data-anchor-id="relative-risks">Relative Risks</h2>
+<ul>
+<li><p>Known as Risk ratio, Hazard ratio (RR/HR).</p></li>
+<li><p>Measure strength of effect on survival.</p></li>
+<li><p>Defined via hazard rates of treatment vs control groups.</p></li>
+</ul>
+<hr>
+</section>
+<section id="testing-survival-curves-differences" class="level2">
+<h2 class="anchored" data-anchor-id="testing-survival-curves-differences">Testing Survival Curves Differences</h2>
+<ul>
+<li><p>Log-rank test for two survival curves.</p></li>
+<li><p>Stratified log-rank test for categorical variables.</p></li>
+</ul>
+<hr>
+</section>
+<section id="log-rank-test" class="level2">
+<h2 class="anchored" data-anchor-id="log-rank-test">Log-Rank Test</h2>
+<ul>
+<li><p>Test equality of two survival curves.</p></li>
+<li><p>Statistic based on series of tables.</p></li>
+<li><p>Test at infinity many time points.</p></li>
+</ul>
+<hr>
+</section>
+<section id="cox-regression" class="level2">
+<h2 class="anchored" data-anchor-id="cox-regression">Cox regression</h2>
+<p><img src="images/paste-D471FE1D.png" class="img-fluid"></p>
+<hr>
+</section>
+<section id="cox-regression-1" class="level2">
+<h2 class="anchored" data-anchor-id="cox-regression-1">Cox regression</h2>
+<p><img src="images/paste-9999D4AB.png" class="img-fluid"></p>
+<p><img src="images/paste-F1FB414D.png" class="img-fluid"></p>
+<p><img src="images/paste-AE57A93C.png" class="img-fluid"></p>
+<hr>
+</section>
+<section id="cox-proportional-hazards-model" class="level2">
+<h2 class="anchored" data-anchor-id="cox-proportional-hazards-model">Cox Proportional Hazards Model</h2>
+<ul>
+<li><p>Model setup</p></li>
+<li><p>The Cox PH model specifies the hazard for individual i.</p></li>
+<li><p>Note: There is no intercept term in the Cox model.</p></li>
+<li><p>Model assumption</p></li>
+<li><p>Proportional hazards (PH) assumption.</p></li>
+<li><p>PH assumption requires a constant over time</p></li>
+<li><p>Model interpretation</p></li>
+</ul>
+<hr>
+</section>
+<section id="checking-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="checking-assumptions">Checking Assumptions</h2>
+<ul>
+<li><p>Deviance residual plot</p></li>
+<li><p>Schoenfeld resiual plot</p></li>
+<li><p>to check proportional hazards assumption</p></li>
+<li><p>randomness of residuals == proportionality</p></li>
+</ul>
+<hr>
+</section>
+<section id="when-ph-assumption-is-violated" class="level2">
+<h2 class="anchored" data-anchor-id="when-ph-assumption-is-violated">When PH Assumption is Violated</h2>
+<ol type="1">
+<li><p>Stratified Cox model</p></li>
+<li><p>Time-varying coefficients</p></li>
+<li><p>Accelerated failure-time models (AFT)</p></li>
+<li><p>Parametric survival analysis</p></li>
+<li><p>Multilevel survival models etc…</p></li>
+</ol>
+<hr>
+</section>
+<section id="implementing-survival-analysis-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="implementing-survival-analysis-in-r">Implementing survival analysis in R</h2>
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="images/survival.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<hr>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<ul>
+<li><p>Survival Analysis is crucial in various fields.</p></li>
+<li><p>Various methods available for estimation &amp; testing.</p></li>
+<li><p>R offers comprehensive tools for survival analysis.</p></li>
+</ul>
+
+
 </section>
 
 </main> <!-- /main -->
