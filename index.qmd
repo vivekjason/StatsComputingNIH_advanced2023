@@ -14,25 +14,25 @@ This workshop advances the groundwork for addressing key practical aspects of pr
 
 ## **Getting started**
 
-Have a look at the schedule below and download the necessary .qmd files for each session. Slides are also provided. While I have included solutions- it would be way more beneficial to attempt these yourself first. Lets try to maximise learning in the next two days.
+Have a look at the schedule below and download the necessary .qmd files for each session. Slides are also provided. While I have included [solutions](https://github.com/vivekjason/StatsComputingNIH_advanced2023/tree/master/tutorials/backup)- it would be way more beneficial to attempt these yourself first. Let's try to maximise learning in the next two days. Additionally, please download the data files for the workshop [here](https://www.dropbox.com/sh/xy51t0b0qigerxi/AADkR4GtAw_sbs8DBlLF13xMa?dl=1).
 
 ## Schedule and Materials
 
-| Date                   | Time                 | Topic                       |                  |
-|:--------------|:--------------|:------------------|-------------------------|
-| 10.10.2023 (Tuesday)   | 08.30 am - 09.00 am  | Registration                |                  |
-|                        | 9.00 am - 10.00 am   | Advanced data wranggling    | Slides \| Codes  |
-|                        | 10.00 am - 12.30 pm  | #Taking the Wheel 1         | Tutorial         |
-|                        | 12.30 pm - 02.00 pm  | Break                       |                  |
-|                        | 02.00 pm - 04.30 pm  | Advanced data visualisation | Slides \| Codes  |
-|                        | 03.00 pm - 04.30 pm  | #Taking the Wheel 2         | Tutorial         |
-| 11.10.2023 (Wednesday) | 08.00 am -- 08.30 am | Registration                |                  |
-|                        | 09.00 am - 10.00 am  | Survival analysis           | Slides \| Codes  |
-|                        | 10.00 am - 12.30 pm  | #Taking the Wheel 3         | Tutorial         |
-|                        | 12.30 pm - 02.00 pm  | Break                       |                  |
-|                        | 02.00 pm - 03.00 pm  | GEE and GLMM                | Slides \| Codes  |
-|                        | 03.00 pm - 04.30 pm  | #Taking the Wheel 4         | Tutorial         |
-|                        | 04.30 pm - 05.00 pm  | Q&A                         |                  |
+| Date                   | Time                 | Topic                       |                                                                                                                                                                                                                                                          |
+|:----------------|:----------------|:----------------|----------------------|
+| 10.10.2023 (Tuesday)   | 08.30 am - 09.00 am  | Registration                |                                                                                                                                                                                                                                                          |
+|                        | 9.00 am - 10.00 am   | Advanced data wranggling    | [Slides](https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_advDataWranggling.html)\| [Codes](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_advDataWranggling.qmd) |
+|                        | 10.00 am - 12.30 pm  | #Taking the Wheel 1         | [Tutorial](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_advDataWranggling.qmd)                                                                                                                            |
+|                        | 12.30 pm - 02.00 pm  | Break                       |                                                                                                                                                                                                                                                          |
+|                        | 02.00 pm - 04.30 pm  | Advanced data visualisation | [Slides](https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_advDataViz.html)\| [Codes](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_advDataViz.qmd)               |
+|                        | 03.00 pm - 04.30 pm  | #Taking the Wheel 2         | [Tutorial](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_advDataViz.qmd)                                                                                                                                   |
+| 11.10.2023 (Wednesday) | 08.00 am -- 08.30 am | Registration                |                                                                                                                                                                                                                                                          |
+|                        | 09.00 am - 10.00 am  | Survival analysis           | [Slides](https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_survival.html) \| [Codes](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_survival.qmd)                  |
+|                        | 10.00 am - 12.30 pm  | #Taking the Wheel 3         | [Tutorial](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_survival.qmd)                                                                                                                                     |
+|                        | 12.30 pm - 02.00 pm  | Break                       |                                                                                                                                                                                                                                                          |
+|                        | 02.00 pm - 03.00 pm  | GEE and GLMM                | [Slides](https://raw.githubusercontent.com/vivekjason/StatsComputingNIH_advanced2023/master/_site/slides_longitudinal.html) \| [Codes](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/scripts/codes_longitudinal.qmd)          |
+|                        | 03.00 pm - 04.30 pm  | #Taking the Wheel 4         | [Tutorial](https://github.com/vivekjason/StatsComputingNIH_advanced2023/blob/master/tutorials/tutorial_longitudinal.qmd)                                                                                                                                 |
+|                        | 04.30 pm - 05.00 pm  | Q&A                         |                                                                                                                                                                                                                                                          |
 
 ## Speakers
 
@@ -52,10 +52,10 @@ Swee Hung is a training Public Health Physician from the Institute for Clinical 
 
 **Yvonne Lim Mei Fong**
 
-Yvonne is a detail-oriented pharmacist at ICR, with a PhD in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality for her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit
+Yvonne is a detail-oriented pharmacist at ICR with a Ph.D. in Epidemiology, currently focusing her expertise on heart failure. Known for her caring and helpful nature, she is highly capable in her field, always ensuring the best quality of her work. In her downtime, Yvonne enjoys the company of cats and dogs, reflecting her nurturing spirit.
 
 This course was developed and is maintained by [Vivek Jason](https://github.com/vivekjason).
 
-The following individuals have contributed to improving the course or materials have been adapted from their courses: [R for Applied Epidemiology and Public Health](https://epirhandbook.com/en/) and [R for Researchers: An Introduction](https://tysonbarrett.com/Rstats/index.html)
+The following individuals have contributed to improving the course, or materials have been adapted from their courses: [R for Applied Epidemiology and Public Health](https://epirhandbook.com/en/) and [R for Researchers: An Introduction](https://tysonbarrett.com/Rstats/index.html).
 
-The course materials are licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know and I will remove it.
+The course materials are licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). Linked and embedded materials are governed by their own licenses. I assume that all external materials used or embedded here are covered under the educational fair use policy. If this is not the case and any material displayed here violates copyright, please let me know, and I will remove it.
